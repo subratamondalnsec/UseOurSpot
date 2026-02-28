@@ -1,38 +1,36 @@
 // ParkingSpot Model — Smart Parking System
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const parkingSpotSchema = new mongoose.Schema(
+const ratingSchema = new Schema({
+  userId:    { type: Schema.Types.ObjectId, ref: 'User' },
+  rating:    { type: Number, min: 1, max: 5 },
+  comment:   { type: String },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const parkingSpotSchema = new Schema(
   {
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    title: { type: String, required: true },
-    description: { type: String },
-    address: { type: String, required: true },
-    location: {
-      type: { type: String, default: 'Point' },
-      coordinates: { type: [Number], required: true }, // [longitude, latitude]
+    ownerId:       { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    address:       { type: String, required: true },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
     },
-    photos: [{ type: String }],
-    rules: { type: String },
-    pricePerHour: { type: Number, required: true },
-    dynamicPricing: {
-      enabled: { type: Boolean, default: false },
-      multiplier: { type: Number, default: 1.5 }, // applied during events
-    },
-    availability: [
-      {
-        day: { type: String, enum: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] },
-        openTime: String,
-        closeTime: String,
-      },
-    ],
-    isVerified: { type: Boolean, default: false },
-    isAvailable: { type: Boolean, default: true },
-    totalSlots: { type: Number, default: 1 },
-  },
-  { timestamps: true }
+    photos:        [{ type: String }],                         // Cloudinary URLs
+    size:          { type: String, enum: ['small', 'medium', 'large'] },
+    type:          { type: String, enum: ['open', 'covered'] },
+    rules:         { type: String },
+    availability:  { type: String, enum: ['always', 'event-based', 'custom'] },
+    availableFrom: { type: String },
+    availableTo:   { type: String },
+    pricePerHour:  { type: Number, required: true },
+    status:        { type: String, enum: ['free', 'occupied'], default: 'free' },
+    isApproved:    { type: Boolean, default: false },
+    ratings:       [ratingSchema],
+    averageRating: { type: Number, default: 0 },
+    createdAt:     { type: Date, default: Date.now },
+  }
 );
-
-// Geospatial index for real-time map queries
-parkingSpotSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('ParkingSpot', parkingSpotSchema);
