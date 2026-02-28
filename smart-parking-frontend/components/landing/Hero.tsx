@@ -1,60 +1,188 @@
 "use client";
 
+import { useRef } from "react";
 import { IconCheck } from "@tabler/icons-react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import Image from "next/image";
 
-const pins = [
-  { id: 1, price: "$5.0/h", top: "58%", left: "15%" },
-  { id: 2, price: "$2.0/h", top: "68%", left: "72%" },
-  { id: 3, price: "$3.2/h", top: "20%", left: "45%" },
-  { id: 4, price: "$2.1/h", top: "26%", left: "78%" },
+/* ─────────────────── Price-pin data ─────────────────── */
+interface PricePinData {
+  id: number;
+  label: string;
+  x: string;
+  y: string;
+  appearAt: number;
+  fadeAt: number;
+}
+
+
+const pricePins: PricePinData[] = [
+  { id: 1, label: "₹45/hr", x: "28%", y: "68%", appearAt: 0.15, fadeAt: 0.55 },
+  { id: 2, label: "₹62/hr", x: "72%", y: "42%", appearAt: 0.55, fadeAt: 0.85 },
+  { id: 3, label: "₹38/hr", x: "38%", y: "32%", appearAt: 0.28, fadeAt: 0.60 },
+  { id: 4, label: "₹80/hr", x: "68%", y: "18%", appearAt: 0.65, fadeAt: 0.95 },
+  { id: 5, label: "₹50/hr", x: "15%", y: "50%", appearAt: 0.10, fadeAt: 0.40 },
+  { id: 6, label: "₹75/hr", x: "82%", y: "75%", appearAt: 0.45, fadeAt: 0.80 },
+  { id: 7, label: "₹40/hr", x: "45%", y: "85%", appearAt: 0.20, fadeAt: 0.50 },
+  { id: 8, label: "₹90/hr", x: "10%", y: "25%", appearAt: 0.75, fadeAt: 0.98 },
 ];
 
+
+/* ─────────────────── PricePin component ─────────────────── */
+function PricePin({
+  pin,
+  scrollYProgress,
+}: {
+  pin: PricePinData;
+  scrollYProgress: MotionValue<number>;
+}) {
+  const opacity = useTransform(
+    scrollYProgress,
+    [pin.appearAt - 0.02, pin.appearAt, pin.fadeAt, pin.fadeAt + 0.05],
+    [0, 1, 1, 0]
+  );
+
+  const scale = useTransform(
+    scrollYProgress,
+    [pin.appearAt - 0.02, pin.appearAt],
+    [0.4, 1]
+  );
+
+  return (
+    <motion.div
+      className="absolute pointer-events-none z-50 flex items-center gap-2"
+      style={{
+        left: pin.x,
+        top: pin.y,
+        opacity,
+        scale,
+        translateX: "-50%",
+        translateY: "-50%",
+      }}
+    >
+      {/* Number circle */}
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+        style={{
+          background: "#4A9EAD",
+          boxShadow: "0 0 14px rgba(74,158,173,0.6)",
+        }}
+      >
+        {pin.id}.
+      </div>
+      {/* Price label pill */}
+      <div
+        className="text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap"
+        style={{
+          background: "rgba(10, 13, 20, 0.88)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(74,158,173,0.25)",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
+        }}
+      >
+        {pin.label}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────── Fade-up helper ─────────────────── */
 const fadeUp = (delay = 0) => ({
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay, ease: "easeOut" as const } },
+  hidden: {
+    opacity: 0,
+    y: 30,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, delay, ease: "easeOut" as const },
+  },
 });
 
+/* ═══════════════════════════════════════════════════════════
+   HeroSection — scroll-driven car animation
+   ═══════════════════════════════════════════════════════════ */
 export default function HeroSection() {
-  return (
-    <section className="relative min-h-screen w-full flex items-center pt-20 overflow-hidden" style={{ background: "#050509" }}>
-      {/* Ambient glow orbs */}
-      <div className="absolute top-[20%] left-[10%] w-[600px] h-[600px] bg-[#4A9EAD]/8 rounded-full blur-[200px] pointer-events-none" />
-      <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-[#4A9EAD]/5 rounded-full blur-[150px] pointer-events-none" />
+  const sectionRef = useRef<HTMLElement>(null);
 
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-        {/* LEFT: Text */}
-        <div className="flex flex-col items-start py-12">
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  /* ── Car position ── */
+  // Phase 1 (0 → 0.45): car drives south → y 15% → 55%, x stays 50%
+  // Phase 2 (0.45 → 1):  car drives east  → x 50% → 82%, y stays 55%
+  const carX = useTransform(scrollYProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
+  const carY = useTransform(scrollYProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
+
+  /* ── Car rotation ── */
+  // 180° = nose south, 90° = nose east
+  // Smooth turn at scroll 0.40 → 0.50
+  const carRotation = useTransform(
+    scrollYProgress,
+    [0, 0.01, 0.40, 0.50, 1.0],
+    [180, 180, 180, 90, 90]
+  );
+
+  /* ── Blue beam ── */
+  const beamLength = useTransform(scrollYProgress, [0, 0.3], [60, 200]);
+  const beamOpacity = useTransform(scrollYProgress, [0, 0.05, 0.88, 1], [0, 0.9, 0.9, 0]);
+
+  /* ── Teal glow under car ── */
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
+
+  /* ── Route dash offset (drawn path) ── */
+  const routeDrawProgress = useTransform(scrollYProgress, [0, 1], [1, 0]);
+
+  return (
+    <section ref={sectionRef} className="relative min-h-[300vh]">
+      {/* ───── Sticky wrapper — pinned for full scroll ───── */}
+      <div className="sticky top-0 h-screen flex overflow-hidden" style={{ background: "#050509" }}>
+        {/* Ambient glow orbs */}
+        <div className="absolute top-[20%] left-[10%] w-[600px] h-[600px] bg-[#4A9EAD]/8 rounded-full blur-[200px] pointer-events-none" />
+        <div className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-[#4A9EAD]/5 rounded-full blur-[150px] pointer-events-none" />
+
+        {/* ══════ LEFT COLUMN — Text ══════ */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 lg:px-16 relative z-10">
+          {/* Badge */}
           <motion.div
             variants={fadeUp(0.2)}
             initial="hidden"
             animate="visible"
-            className="bg-[#0e1118] border border-[#4A9EAD]/15 rounded-full px-5 py-2 text-xs text-[#6b7685] flex items-center gap-2 mb-8 shadow-[0_0_30px_rgba(74,158,173,0.06)]"
+            className="bg-[#0e1118] border border-[#4A9EAD]/15 rounded-full px-5 py-2 text-xs text-[#6b7685] flex items-center gap-2 mb-8 w-fit shadow-[0_0_30px_rgba(74,158,173,0.06)]"
           >
-            <span className="text-[#4A9EAD]">✦</span> 1# best software fest 2023
+            <span className="text-[#4A9EAD]">✦</span> Smart Parking Platform
           </motion.div>
 
+          {/* Heading */}
           <motion.h1
             variants={fadeUp(0.4)}
             initial="hidden"
             animate="visible"
             className="text-5xl sm:text-6xl xl:text-[5.2rem] font-black uppercase leading-[0.95] tracking-tight mb-7"
           >
-            THE SOLUTION TO<br />
-            YOUR PARKING<br />
-            <span className="text-[#4A9EAD] drop-shadow-[0_0_30px_rgba(74,158,173,0.4)]">PROBLEMS</span>
+            THE SOLUTION TO
+            <br />
+            YOUR PARKING
+            <br />
+            <span className="text-[#4A9EAD] drop-shadow-[0_0_30px_rgba(74,158,173,0.4)]">
+              PROBLEMS
+            </span>
           </motion.h1>
 
+          {/* Subtext */}
           <motion.p
             variants={fadeUp(0.6)}
             initial="hidden"
             animate="visible"
             className="text-sm text-[#5a6370] max-w-md mb-8 leading-relaxed"
           >
-            The mobile parking app that is integrated with GPS that it can make it easier
-            for you to find the nearest parking lot with a variety of price ranges.
+            Find, book and pay for parking spots near any event — instantly. Real-time
+            availability, dynamic pricing, and GPS navigation to your exact spot.
           </motion.p>
 
+          {/* Email CTA */}
           <motion.div
             variants={fadeUp(0.8)}
             initial="hidden"
@@ -66,18 +194,19 @@ export default function HeroSection() {
               placeholder="Your email address"
               className="flex-1 bg-[#0a0d14] rounded-full px-6 py-4 border border-white/8 text-white placeholder:text-[#3a4050] text-sm outline-none focus:border-[#4A9EAD]/40 transition-colors shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]"
             />
-            <button className="bg-[#4A9EAD] text-white rounded-full px-8 py-4 font-semibold text-sm hover:brightness-110 transition-all whitespace-nowrap shadow-[0_4px_20px_rgba(74,158,173,0.35),0_0_60px_rgba(74,158,173,0.15)]">
+            <button className="bg-[#4A9EAD] text-white rounded-full px-8 py-4 font-semibold text-sm hover:brightness-110 transition-all whitespace-nowrap shadow-[0_4px_20px_rgba(74,158,173,0.35),0_0_60px_rgba(74,158,173,0.15)] cursor-pointer">
               Get Access
             </button>
           </motion.div>
 
+          {/* Trust badges */}
           <motion.div
             variants={fadeUp(1.0)}
             initial="hidden"
             animate="visible"
             className="flex flex-wrap gap-6 mt-5 text-xs text-[#5a6370]"
           >
-            {["No spam email", "22/7 support system", "Free trial 13 days"].map((t) => (
+            {["No spam email", "24/7 support", "Free trial 13 days"].map((t) => (
               <span key={t} className="flex items-center gap-1.5">
                 <IconCheck className="w-3.5 h-3.5 text-[#4A9EAD]" />
                 {t}
@@ -86,54 +215,157 @@ export default function HeroSection() {
           </motion.div>
         </div>
 
-        {/* RIGHT: Video with overlay pins */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.3, ease: "easeOut" as const }}
-          className="relative w-full h-[500px] lg:h-[650px]"
-        >
-          {/* Video Container */}
-          <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-[0_20px_80px_rgba(0,0,0,0.8),0_0_120px_rgba(74,158,173,0.08)]">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              style={{ filter: "brightness(0.85) contrast(1.1) saturate(1.2)" }}
-            >
-              <source src="/images/video.mp4" type="video/mp4" />
-            </video>
+        {/* ══════ RIGHT COLUMN — Map + Car Animation ══════ */}
+        <div className="hidden lg:block w-1/2 relative h-full">
+          {/* Dark map background image */}
+          <Image
+            src="/images/map-full.png"
+            alt="Dark city map"
+            fill
+            className="object-cover"
+            style={{ filter: "brightness(0.9) contrast(1.05)" }}
+            priority
+          />
 
-            {/* Edge fade overlays to blend video into the dark background */}
-            <div className="absolute inset-0 bg-linear-to-l from-transparent via-transparent to-[#050509]" />
-            <div className="absolute inset-0 bg-linear-to-t from-[#050509]/60 via-transparent to-[#050509]/30" />
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-[#050509]/20" />
+          {/* Left edge fade — blends map into left column */}
+          <div
+            className="absolute inset-y-0 left-0 w-40 pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(to right, #050509, transparent)",
+            }}
+          />
+          {/* Top/bottom edge fades */}
+          <div
+            className="absolute inset-x-0 top-0 h-24 pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(to bottom, #050509, transparent)",
+            }}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-24 pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(to top, #050509, transparent)",
+            }}
+          />
 
-            {/* Subtle vignette */}
-            <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(5,5,9,0.5)]" />
-          </div>
+          {/* ── Route path SVG overlay ── */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-20"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="routeGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#4A9EAD" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#4A9EAD" stopOpacity="0.15" />
+              </linearGradient>
+            </defs>
+            {/* Route line: south then east */}
+            <motion.path
+              d="M 50 15 L 50 55 L 82 55"
+              fill="none"
+              stroke="url(#routeGrad)"
+              strokeWidth="0.5"
+              strokeDasharray="2 2"
+              style={{ pathLength: routeDrawProgress }}
+            />
+            {/* Point A marker */}
+            <circle cx="50" cy="15" r="1.4" fill="#4A9EAD" opacity="0.7">
+              <animate attributeName="r" values="1.4;2;1.4" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+            </circle>
+            {/* Point B marker */}
+            <circle cx="82" cy="55" r="1.4" fill="#4A9EAD" opacity="0.7">
+              <animate attributeName="r" values="1.4;2;1.4" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+            </circle>
+          </svg>
 
-          {/* Floating Price Pin Badges on top of the video */}
-          {pins.map((pin, i) => (
+          {/* ── Teal glow circle under car ── */}
+          <motion.div
+            className="absolute pointer-events-none z-25 rounded-full"
+            style={{
+              left: carX,
+              top: carY,
+              opacity: glowOpacity,
+              width: 120,
+              height: 120,
+              x: "-50%",
+              y: "-50%",
+              background:
+                "radial-gradient(circle, rgba(74,158,173,0.3) 0%, rgba(74,158,173,0.1) 50%, transparent 75%)",
+              willChange: "transform",
+            }}
+          />
+
+          {/* ── Blue beam SVG — extends from car front ── */}
+          <motion.div
+            className="absolute pointer-events-none z-30"
+            style={{
+              left: carX,
+              top: carY,
+              x: "-50%",
+              y: "-50%",
+              rotate: carRotation,
+              willChange: "transform",
+            }}
+          >
             <motion.div
-              key={pin.id}
-              initial={{ opacity: 0, scale: 0.3 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2 + i * 0.2, duration: 0.5, ease: "backOut" }}
-              className="absolute z-20 flex items-center gap-2"
-              style={{ top: pin.top, left: pin.left }}
-            >
-              <div className="w-9 h-9 rounded-full bg-[#4A9EAD] flex items-center justify-center text-xs font-bold text-white shadow-[0_4px_20px_rgba(74,158,173,0.5)]">
-                {pin.id}.
-              </div>
-              <div className="bg-[#0a0d14]/90 backdrop-blur-md border border-[#4A9EAD]/20 rounded-full px-3.5 py-1.5 text-xs text-white font-medium shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
-                {pin.price}
-              </div>
-            </motion.div>
+              className="absolute left-1/2 -translate-x-1/2"
+              style={{
+                bottom: "50%",
+                width: 6,
+                height: beamLength,
+                opacity: beamOpacity,
+                background:
+                  "linear-gradient(to top, rgba(74,158,173,0.9), rgba(103,232,249,0.3), transparent)",
+                borderRadius: 3,
+                filter: "blur(1px)",
+                willChange: "transform, height",
+              }}
+            />
+          </motion.div>
+
+          {/* ── Car image ── */}
+          <motion.div
+            className="absolute pointer-events-none z-40"
+            style={{
+              left: carX,
+              top: carY,
+              rotate: carRotation,
+              x: "-50%",
+              y: "-50%",
+              width: 68,
+              willChange: "transform",
+              filter:
+                "drop-shadow(0 6px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 8px rgba(74,158,173,0.3))",
+            }}
+          >
+            <Image
+              src="/images/car1.png"
+              alt="Car top-down view"
+              width={68}
+              height={136}
+              className="w-full h-auto"
+              priority
+            />
+          </motion.div>
+
+          {/* ── Price pin badges ── */}
+          {pricePins.map((pin) => (
+            <PricePin key={pin.id} pin={pin} scrollYProgress={scrollYProgress} />
           ))}
-        </motion.div>
+        </div>
+
+        {/* ── Mobile: static map preview (shown below text on small screens) ── */}
+        <div className="lg:hidden absolute inset-0 pointer-events-none">
+          <Image
+            src="/images/hero-map.png"
+            alt="Dark city map"
+            fill
+            className="object-cover opacity-15"
+          />
+        </div>
       </div>
     </section>
   );
