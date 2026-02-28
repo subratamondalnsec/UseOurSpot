@@ -1,13 +1,19 @@
-// Driver Routes — /api/driver
-const express  = require('express');
-const router   = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const { searchSpots } = require('../controllers/driverController');
+const express = require('express');
+const router = express.Router();
 
-// All routes require login
+const { protect, authorizeRole } = require('../middleware/authMiddleware');
+const { searchSpots, addCarDetails } = require('../controllers/driverController');
+
+// Protect all routes first
 router.use(protect);
 
-// GET /api/driver/search?lat=&lng=&maxPrice=&type=&size=
+// Only drivers allowed
+router.use(authorizeRole("driver"));
+
+// GET /api/driver/search
 router.get('/search', searchSpots);
+
+// POST /api/driver/add-car
+router.post('/add-car', addCarDetails);
 
 module.exports = router;

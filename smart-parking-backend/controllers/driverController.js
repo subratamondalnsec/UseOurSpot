@@ -1,4 +1,6 @@
 const ParkingSpot = require('../models/ParkingSpot');
+const User        = require('../models/User');
+const Car        = require('../models/Car');
 
 // ─── @route  GET /api/driver/search ─────────────────────────
 // @access Private (driver)
@@ -60,3 +62,56 @@ exports.searchSpots = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+exports.addCarDetails = async (req, res) => {
+  try {
+    const { licensePlate, color, company, model, year } = req.body;
+
+    const userId = req.user.id; // assuming auth middleware sets req.user
+
+    // Check if license plate already exists
+    const existingCar = await Car.findOne({ licensePlate });
+    if (existingCar) {
+      return res.status(400).json({
+        success: false,
+        message: "Car with this license plate already exists"
+      });
+    }
+
+    // Create new car
+    const newCar = await Car.create({
+      licensePlate,
+      color,
+      company,
+      model,
+      year,
+      owner: userId
+    });
+
+    // Add car reference to user
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { cars: newCar._id } },
+      { new: true }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Car added successfully",
+      car: newCar
+    });
+
+  } catch (error) {
+    console.error("Add Car Error:", error.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// => /api/driver/add-car
+// {
+//   "licensePlate": "WB06AB1234",
+//   "color": "White",
+//   "company": "Toyota",
+//   "model": "Innova",
+//   "year": 2022
+// }
