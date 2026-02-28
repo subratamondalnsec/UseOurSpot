@@ -335,7 +335,7 @@ export default function HeroSection() {
               rotate: carRotation,
               x: "-50%",
               y: "-50%",
-              width: 68,
+              width: 55,
               willChange: "transform",
               filter:
                 "drop-shadow(0 6px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 8px rgba(74,158,173,0.3))",
@@ -344,8 +344,8 @@ export default function HeroSection() {
             <Image
               src="/images/car1.png"
               alt="Car top-down view"
-              width={68}
-              height={136}
+              width={44}
+              height={88}
               className="w-full h-auto"
               priority
             />
