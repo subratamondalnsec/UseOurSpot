@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { IconCheck } from "@tabler/icons-react";
 import { motion, useScroll, useTransform, MotionValue, useSpring, useMotionValueEvent, useMotionValue } from "framer-motion";
 import Image from "next/image";
+import { FlipWords } from "./FlipWords";
 
 /* ─────────────────── Price-pin data ─────────────────── */
 interface PricePinData {
@@ -110,15 +111,15 @@ export default function HeroSection() {
     offset: ["start start", "end end"],
   });
 
+  // Apply a single spring to the overall scroll progress to guarantee perfect path adherence 
+  // and prevent corner-cutting when scrolling super fast
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
+
   /* ── Car position ── */
   // Phase 1 (0 → 0.45): car drives south → y 15% → 55%, x stays 50%
   // Phase 2 (0.45 → 1):  car drives east (right) → x 50% → 82%, y stays 55%
-  const carXRaw = useTransform(scrollYProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
-  const carYRaw = useTransform(scrollYProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
-
-  // Smooth out the position transitions
-  const carX = useSpring(carXRaw, { stiffness: 50, damping: 20 });
-  const carY = useSpring(carYRaw, { stiffness: 50, damping: 20 });
+  const carX = useTransform(smoothProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
+  const carY = useTransform(smoothProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
 
   /* ── Car rotation ── */
   // 180° = nose south, 90° = nose east
@@ -126,8 +127,8 @@ export default function HeroSection() {
   const dynamicRotation = useMotionValue(180);
   const carRotation = useSpring(dynamicRotation, { stiffness: 60, damping: 15 });
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const previous = scrollYProgress.getPrevious() ?? 0;
+  useMotionValueEvent(smoothProgress, "change", (latest) => {
+    const previous = smoothProgress.getPrevious() ?? 0;
     const diff = latest - previous;
 
     // Ignore tiny scroll jitters or zero movement to prevent twitching
@@ -155,26 +156,25 @@ export default function HeroSection() {
   });
 
   /* ── Blue beam ── */
-  const beamLength = useTransform(scrollYProgress, [0, 0.3], [60, 200]);
-  const beamOpacity = useTransform(scrollYProgress, [0, 0.05, 0.88, 1], [0, 0.9, 0.9, 0]);
+  const beamLength = useTransform(smoothProgress, [0, 0.3], [60, 200]);
+  const beamOpacity = useTransform(smoothProgress, [0, 0.05, 0.88, 1], [0, 0.9, 0.9, 0]);
 
   /* ── Teal glow under car ── */
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
+  const glowOpacity = useTransform(smoothProgress, [0, 0.05], [0, 1]);
 
   /* ── Route dash offset (drawn path) ── */
-  const routeDrawProgress = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  const routeDrawProgress = useTransform(smoothProgress, [0, 1], [1, 0]);
 
-  /* ── Smooth Scrolling for the section wrapper ── */
+  // Ensure user starts at top of page on refresh so the car animation sequence always correctly begins at first position
   useEffect(() => {
-    // Lenis smooth scroll implementation for frictionless scroll
-    (async () => {
-      const LocomotiveScroll = (await import("locomotive-scroll")).default;
-      const locomotiveScroll = new LocomotiveScroll();
-    })();
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[300vh] scroll-smooth">
+    <section ref={sectionRef} className="relative min-h-[300vh]">
       {/* ───── Sticky wrapper — pinned for full scroll ───── */}
       <div className="sticky top-0 h-screen flex overflow-hidden" style={{ background: "#050509" }}>
         {/* Ambient glow orbs */}
@@ -193,25 +193,42 @@ export default function HeroSection() {
             <span className="text-[#4A9EAD]">✦</span> Smart Parking Platform
           </motion.div>
 
-          {/* Heading */}
+          {/* Heading Line 1 */}
           <motion.h1
             variants={fadeUp(0.4)}
             initial="hidden"
             animate="visible"
-            className="text-5xl sm:text-6xl xl:text-[5.2rem] font-black uppercase leading-[0.95] tracking-tight mb-7"
+            className="text-5xl sm:text-6xl xl:text-[5.2rem] font-black uppercase leading-[0.95] tracking-tight mb-2"
           >
             THE SOLUTION TO
-            <br />
-            YOUR PARKING
-            <br />
-            <span className="text-[#4A9EAD] drop-shadow-[0_0_30px_rgba(74,158,173,0.4)]">
-              PROBLEMS
-            </span>
           </motion.h1>
+          
+          {/* Heading Line 2 */}
+          <motion.h1
+            variants={fadeUp(0.6)}
+            initial="hidden"
+            animate="visible"
+            className="text-5xl sm:text-6xl xl:text-[5.2rem] font-black uppercase leading-[0.95] tracking-tight mb-4"
+          >
+            YOUR PARKING
+          </motion.h1>
+
+          {/* FlipWord line */}
+          <motion.div
+            className="flex items-baseline gap-4 mb-7"
+            variants={fadeUp(0.8)}
+            initial="hidden"
+            animate="visible"
+          >
+            <FlipWords
+              words={["Smarter", "Faster", "Effortless","Affordable", "Reliable"]}
+              className="text-4xl w-full sm:text-5xl xl:text-[4.8rem] font-black uppercase leading-[0.95] tracking-tight text-[#4A9EAD] drop-shadow-[0_0_30px_rgba(74,158,173,0.4)]"
+            />
+          </motion.div>
 
           {/* Subtext */}
           <motion.p
-            variants={fadeUp(0.6)}
+            variants={fadeUp(0.9)}
             initial="hidden"
             animate="visible"
             className="text-sm text-[#5a6370] max-w-md mb-8 leading-relaxed"
@@ -222,7 +239,7 @@ export default function HeroSection() {
 
           {/* Email CTA */}
           <motion.div
-            variants={fadeUp(0.8)}
+            variants={fadeUp(1.0)}
             initial="hidden"
             animate="visible"
             className="flex w-full max-w-md gap-3"
@@ -239,7 +256,7 @@ export default function HeroSection() {
 
           {/* Trust badges */}
           <motion.div
-            variants={fadeUp(1.0)}
+            variants={fadeUp(1.2)}
             initial="hidden"
             animate="visible"
             className="flex flex-wrap gap-6 mt-5 text-xs text-[#5a6370]"
