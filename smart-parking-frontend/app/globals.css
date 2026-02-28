@@ -207,6 +207,20 @@
   animation: fade-in 0.4s ease-out forwards;
 }
 
+/* Selected Card Pulse */
+@keyframes selected-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.008);
+  }
+}
+
+.selected-card {
+  animation: selected-pulse 2s ease-in-out infinite;
+}
+
 /* Custom Scrollbar Styles */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;

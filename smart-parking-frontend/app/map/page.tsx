@@ -413,7 +413,7 @@ export default function MapView() {
             
             {/* Scrollable content area */}
             <div 
-              className="flex-1 p-4 space-y-3 custom-scrollbar"
+              className="flex-1 px-4 py-5 custom-scrollbar"
               style={{
                 height: 0,
                 scrollbarWidth: "thin",
@@ -423,34 +423,39 @@ export default function MapView() {
                 touchAction: "pan-y",
                 overflowY: "scroll",
                 overscrollBehavior: "contain",
-                willChange: "scroll-position"
+                willChange: "scroll-position",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px"
               }}
             >
 
             {/* Empty state */}
             {!spotsLoading && spots.length === 0 && (
               <div
-                className="rounded-2xl p-10 flex flex-col items-center text-center gap-4 animate-fade-in"
+                className="rounded-2xl p-12 flex flex-col items-center text-center gap-5 animate-fade-in"
                 style={{ 
-                  background: "linear-gradient(135deg, oklch(1 0 0 / 5%), oklch(1 0 0 / 2%))",
-                  border: "2px solid oklch(1 0 0 / 8%)",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)"
+                  background: "linear-gradient(135deg, oklch(1 0 0 / 6%), oklch(1 0 0 / 3%))",
+                  border: "2px solid oklch(1 0 0 / 10%)",
+                  boxShadow: "0 6px 25px rgba(0, 0, 0, 0.15), inset 0 2px 0 0 oklch(1 0 0 / 8%)",
+                  position: "relative",
+                  isolation: "isolate"
                 }}
               >
                 <div
-                  className="flex h-16 w-16 items-center justify-center rounded-2xl relative"
+                  className="flex h-20 w-20 items-center justify-center rounded-2xl relative"
                   style={{ 
-                    background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 20%), oklch(0.623 0.214 259.815 / 10%))",
-                    boxShadow: "0 8px 20px rgba(74, 158, 173, 0.2)"
+                    background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 25%), oklch(0.623 0.214 259.815 / 15%))",
+                    boxShadow: "0 10px 25px rgba(74, 158, 173, 0.25)"
                   }}
                 >
-                  <MapPin size={28} style={{ color: "oklch(0.623 0.214 259.815)" }} className="animate-bounce" />
+                  <MapPin size={32} style={{ color: "oklch(0.623 0.214 259.815)" }} className="animate-bounce" />
                   <div className="absolute inset-0 rounded-2xl" style={{
-                    background: "linear-gradient(135deg, transparent, oklch(1 0 0 / 5%))"
+                    background: "linear-gradient(135deg, transparent, oklch(1 0 0 / 8%))"
                   }} />
                 </div>
                 <div>
-                  <p className="text-white text-base font-bold mb-1">No spots found</p>
+                  <p className="text-white text-lg font-bold mb-2">No spots found</p>
                   <p className="text-xs" style={{ color: "oklch(0.556 0 0)" }}>Try adjusting your filters or search in a different area</p>
                 </div>
               </div>
@@ -461,9 +466,14 @@ export default function MapView() {
               <div
                 key={spot._id}
                 onClick={() => setSelectedSpot(spot)}
-                className="cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
+                className={`cursor-pointer transition-all duration-300 hover:scale-[1.015] hover:-translate-y-1 animate-fade-in ${
+                  selectedSpot?._id === spot._id ? 'selected-card' : ''
+                }`}
                 style={{
-                  animationDelay: `${index * 50}ms`
+                  animationDelay: `${index * 50}ms`,
+                  position: "relative",
+                  isolation: "isolate",
+                  zIndex: selectedSpot?._id === spot._id ? 10 : 1
                 }}
               >
                 <div
@@ -471,26 +481,35 @@ export default function MapView() {
                   style={{
                     backgroundImage: selectedSpot?._id === spot._id
                       ? "linear-gradient(135deg, oklch(0.623 0.214 259.815), oklch(0.488 0.243 264.376 / 50%))"
-                      : "linear-gradient(135deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 5%))",
+                      : "linear-gradient(135deg, oklch(1 0 0 / 12%), oklch(1 0 0 / 6%))",
                     backgroundSize: "200% 200%",
+                    position: "relative",
+                    isolation: "isolate"
                   }}
                 >
                   <div
                     className="rounded-2xl relative overflow-hidden"
                     style={{
                       background: selectedSpot?._id === spot._id
-                        ? "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 15%), oklch(0.623 0.214 259.815 / 8%))"
+                        ? "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 18%), oklch(0.623 0.214 259.815 / 10%))"
                         : "linear-gradient(180deg, oklch(0.145 0 0 / 95%) 0%, oklch(0.145 0 0 / 92%) 100%)",
                       backdropFilter: "blur(20px)",
                       boxShadow: selectedSpot?._id === spot._id
-                        ? "0 8px 30px rgba(74, 158, 173, 0.4), inset 0 1px 0 0 oklch(1 0 0 / 10%)"
-                        : "0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)"
+                        ? "0 10px 35px rgba(74, 158, 173, 0.45), inset 0 2px 0 0 oklch(1 0 0 / 12%)"
+                        : "0 6px 20px rgba(0, 0, 0, 0.15), inset 0 2px 0 0 oklch(1 0 0 / 8%)",
+                      position: "relative",
+                      isolation: "isolate"
                     }}
                   >
                     {selectedSpot?._id === spot._id && (
-                      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
-                        background: "radial-gradient(circle at top right, oklch(0.623 0.214 259.815), transparent 70%)"
-                      }} />
+                      <div 
+                        className="absolute inset-0 pointer-events-none" 
+                        style={{
+                          background: "radial-gradient(circle at top right, oklch(0.623 0.214 259.815 / 25%), transparent 70%)",
+                          opacity: 0.3,
+                          mixBlendMode: "soft-light"
+                        }} 
+                      />
                     )}
                     <SpotCard spot={spot} isNearest={index === 0} onClick={() => setSelectedSpot(spot)} />
                   </div>
@@ -532,61 +551,63 @@ export default function MapView() {
         {/* ── Selected spot bottom bar ──────────────────────── */}
         {selectedSpot && (
           <div
-            className="absolute bottom-0 left-0 right-0 z-[1001] p-px"
+            className="absolute bottom-0 left-0 right-0 z-[1001] p-px animate-fade-in"
             style={{
-              background: "linear-gradient(to top, oklch(0.488 0.243 264.376 / 25%), transparent)",
+              background: "linear-gradient(to top, oklch(0.488 0.243 264.376 / 30%), transparent)",
+              isolation: "isolate"
             }}
           >
             <div
-              className="p-5"
+              className="p-6"
               style={{
-                background: "oklch(0.12 0 0 / 95%)",
-                backdropFilter: "blur(24px)",
-                borderTop: "1px solid oklch(1 0 0 / 10%)",
+                background: "oklch(0.12 0 0 / 97%)",
+                backdropFilter: "blur(30px)",
+                borderTop: "2px solid oklch(1 0 0 / 12%)",
+                boxShadow: "0 -8px 30px rgba(0, 0, 0, 0.3)"
               }}
             >
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                 {/* Info */}
-                <div className="flex flex-wrap items-center gap-5">
+                <div className="flex flex-wrap items-center gap-6">
                   <div>
-                    <p className="text-xs mb-0.5" style={{ color: "oklch(0.556 0 0)" }}>Selected Spot</p>
-                    <p className="text-white font-semibold text-sm">
+                    <p className="text-[10px] font-bold mb-1 uppercase tracking-wider" style={{ color: "oklch(0.556 0 0)" }}>Selected Spot</p>
+                    <p className="text-white font-bold text-base">
                       {selectedSpot.address || selectedSpot.title}
                     </p>
                   </div>
 
                   <div
-                    className="h-8 w-px hidden sm:block"
-                    style={{ background: "oklch(1 0 0 / 10%)" }}
+                    className="h-10 w-px hidden sm:block"
+                    style={{ background: "oklch(1 0 0 / 12%)" }}
                   />
 
                   <div>
-                    <p className="text-xs mb-0.5" style={{ color: "oklch(0.556 0 0)" }}>Distance</p>
-                    <p className="text-white font-semibold text-sm">
+                    <p className="text-[10px] font-bold mb-1 uppercase tracking-wider" style={{ color: "oklch(0.556 0 0)" }}>Distance</p>
+                    <p className="text-white font-bold text-base">
                       {selectedSpot.distance?.toFixed(1)} km
                     </p>
                   </div>
 
                   <div
-                    className="h-8 w-px hidden sm:block"
-                    style={{ background: "oklch(1 0 0 / 10%)" }}
+                    className="h-10 w-px hidden sm:block"
+                    style={{ background: "oklch(1 0 0 / 12%)" }}
                   />
 
                   <div>
-                    <p className="text-xs mb-0.5" style={{ color: "oklch(0.556 0 0)" }}>Price</p>
-                    <p className="font-bold text-sm" style={{ color: "#22c55e" }}>
+                    <p className="text-[10px] font-bold mb-1 uppercase tracking-wider" style={{ color: "oklch(0.556 0 0)" }}>Price</p>
+                    <p className="font-black text-base" style={{ color: "#22c55e" }}>
                       ₹{selectedSpot.pricePerHour}/hr
                     </p>
                   </div>
 
                   <div
-                    className="h-8 w-px hidden sm:block"
-                    style={{ background: "oklch(1 0 0 / 10%)" }}
+                    className="h-10 w-px hidden sm:block"
+                    style={{ background: "oklch(1 0 0 / 12%)" }}
                   />
 
                   <div>
-                    <p className="text-xs mb-0.5" style={{ color: "oklch(0.556 0 0)" }}>Type</p>
-                    <p className="text-white font-semibold text-sm capitalize">{selectedSpot.type}</p>
+                    <p className="text-[10px] font-bold mb-1 uppercase tracking-wider" style={{ color: "oklch(0.556 0 0)" }}>Type</p>
+                    <p className="text-white font-bold text-base capitalize">{selectedSpot.type}</p>
                   </div>
                 </div>
 
@@ -595,21 +616,22 @@ export default function MapView() {
                   <Button
                     variant="ghost"
                     onClick={() => setSelectedSpot(null)}
-                    className="rounded-full text-xs px-4"
+                    className="rounded-full text-xs font-bold px-5 transition-all duration-200 hover:scale-105"
                     style={{
                       color: "oklch(0.556 0 0)",
-                      height: "38px",
-                      border: "1px solid oklch(1 0 0 / 10%)",
+                      height: "42px",
+                      border: "2px solid oklch(1 0 0 / 12%)",
                     }}
                   >
                     Dismiss
                   </Button>
                   <Button
-                    className="rounded-full px-6 font-semibold text-sm"
+                    className="rounded-full px-7 font-bold text-sm transition-all duration-200 hover:scale-105"
                     style={{
-                      background: "oklch(0.87 0 0)",
+                      background: "linear-gradient(135deg, oklch(0.87 0 0), oklch(0.809 0.105 251.813))",
                       color: "oklch(0.145 0 0)",
-                      height: "38px",
+                      height: "42px",
+                      boxShadow: "0 4px 20px rgba(200, 200, 200, 0.3)"
                     }}
                     onClick={() => alert(`Booking ${selectedSpot.address || selectedSpot.title}`)}
                   >

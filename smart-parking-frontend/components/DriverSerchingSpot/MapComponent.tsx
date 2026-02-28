@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet';
 import axios from 'axios';
 import { getDriverIcon, getNearestSpotIcon, getSpotIcon } from '@/utils/mapIcons';
 import { getRoute } from '@/utils/getRoute';
@@ -169,12 +169,6 @@ export default function MapComponent({
     return () => navigator.geolocation.clearWatch(watchId);
   }, [selectedSpot, driverLocation, propDriverLocation]);
 
-  const handleBookNow = (spot: ParkingSpot) => {
-    console.log('Booking spot:', spot);
-    // Navigate to booking page with spot ID
-    alert(`Booking ${spot.address || spot.title}`);
-  };
-
   // Get spot coordinates in [lat, lng] format
   const getSpotPosition = (spot: ParkingSpot): [number, number] => {
     if (spot.location?.coordinates) {
@@ -235,14 +229,7 @@ export default function MapComponent({
         <Marker
           position={[driverLocation.lat, driverLocation.lng]}
           icon={driverIcon}
-        >
-          <Popup>
-            <div className="text-center">
-              <h3 className="font-bold text-blue-600">You are here</h3>
-              <p className="text-sm text-gray-600">Your current location</p>
-            </div>
-          </Popup>
-        </Marker>
+        />
 
         {/* Route Line */}
         {routeData && routeData.geometry && (
@@ -264,82 +251,10 @@ export default function MapComponent({
               eventHandlers={{
                 click: () => setSelectedSpot(spot),
               }}
-            >
-              <Popup>
-                <div className="min-w-[200px]">
-                  <h3 className="font-bold text-lg mb-2">
-                    {spot.address || spot.title || 'Parking Spot'}
-                  </h3>
-                  
-                  <div className="space-y-1 text-sm mb-3">
-                    <p className="flex items-center justify-between">
-                      <span className="text-gray-600">Price:</span>
-                      <span className="font-semibold text-green-600">
-                        ₹{spot.pricePerHour}/hr
-                      </span>
-                    </p>
-                    
-                    <p className="flex items-center justify-between">
-                      <span className="text-gray-600">Distance:</span>
-                      <span className="font-semibold">
-                        {spot.distance ? spot.distance.toFixed(1) : 'N/A'} km away
-                      </span>
-                    </p>
-                    
-                    {spot.type && (
-                      <p className="flex items-center justify-between">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="font-semibold capitalize">{spot.type}</span>
-                      </p>
-                    )}
-                    
-                    {spot.size && (
-                      <p className="flex items-center justify-between">
-                        <span className="text-gray-600">Size:</span>
-                        <span className="font-semibold capitalize">{spot.size}</span>
-                      </p>
-                    )}
-
-                    {index === 0 && (
-                      <p className="text-xs text-green-600 font-bold mt-2 text-center">
-                        ⭐ NEAREST SPOT
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handleBookNow(spot)}
-                    className="w-full bg-gradient-to-r from-[#4A9EAD] to-[#5fbecc] text-white font-bold py-2 px-4 rounded-lg hover:shadow-lg transition-all"
-                  >
-                    Book Now
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
+            />
           );
         })}
       </MapContainer>
-
-      {/* Info Panel */}
-      <div className="absolute top-4 left-4 z-[1000] bg-black/80 backdrop-blur-md text-white p-4 rounded-2xl border border-[#4A9EAD]/20 shadow-xl max-w-xs">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold">Available Parking Spots</h2>
-          {selectedSpot && (
-            <div className="flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />{' '}
-              Live
-            </div>
-          )}
-        </div>
-        <p className="text-sm text-gray-300">
-          Found <span className="text-[#4A9EAD] font-bold">{spots.length}</span> spots near you
-        </p>
-        {spots.length > 0 && (
-          <p className="text-xs text-gray-400 mt-2">
-            Nearest: {spots[0].distance?.toFixed(1)} km away
-          </p>
-        )}
-      </div>
 
       {/* Route Info Bar */}
       {routeData && (
@@ -374,43 +289,6 @@ export default function MapComponent({
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Selected Spot Details */}
-      {selectedSpot && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-black/90 backdrop-blur-md text-white p-6 rounded-2xl border border-[#4A9EAD]/20 shadow-2xl max-w-md w-full mx-4">
-          <div className="flex justify-between items-start mb-3">
-            <h3 className="text-xl font-bold">
-              {selectedSpot.address || selectedSpot.title}
-            </h3>
-            <button
-              onClick={() => setSelectedSpot(null)}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-            <div>
-              <p className="text-gray-400">Price/Hour</p>
-              <p className="text-2xl font-bold text-green-400">₹{selectedSpot.pricePerHour}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Distance</p>
-              <p className="text-2xl font-bold text-[#4A9EAD]">
-                {selectedSpot.distance?.toFixed(1)} km
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => handleBookNow(selectedSpot)}
-            className="w-full bg-gradient-to-r from-[#4A9EAD] to-[#5fbecc] text-white font-bold py-3 px-6 rounded-xl hover:shadow-[0_8px_30px_rgba(74,158,173,0.5)] transition-all"
-          >
-            Book This Spot
-          </button>
         </div>
       )}
     </div>

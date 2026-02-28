@@ -46,15 +46,17 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+      className="group relative rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.015] isolate"
       style={{
         background: "transparent",
+        position: "relative",
+        zIndex: 1
       }}
     >
       {/* Top row: title + price */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-2">
+          <div className="flex items-center gap-2 flex-wrap mb-2.5">
             {isNearest && (
               <span
                 className="text-[10px] font-black px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide flex items-center gap-1.5 animate-pulse"
@@ -84,11 +86,11 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
               </span>
             )}
           </div>
-          <p className="text-base font-bold text-white truncate leading-tight mb-1">
+          <p className="text-base font-bold text-white truncate leading-tight mb-1.5">
             {spot.title || spot.address}
           </p>
           {spot.title && (
-            <p className="text-xs truncate flex items-center gap-1.5" style={{ color: "oklch(0.556 0 0)" }}>
+            <p className="text-[11px] truncate flex items-center gap-1.5" style={{ color: "oklch(0.556 0 0)" }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
@@ -99,35 +101,36 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
         </div>
 
         {/* Price */}
-        <div className="flex-shrink-0 text-right px-3 py-2 rounded-xl" style={{
-          background: "linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05))",
-          border: "1.5px solid rgba(34, 197, 94, 0.3)"
+        <div className="flex-shrink-0 text-center px-4 py-2.5 rounded-xl" style={{
+          background: "linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.08))",
+          border: "2px solid rgba(34, 197, 94, 0.35)",
+          boxShadow: "0 4px 15px rgba(34, 197, 94, 0.15)"
         }}>
-          <p className="text-lg font-black leading-none" style={{ color: "#22c55e" }}>
+          <p className="text-xl font-black leading-none" style={{ color: "#22c55e" }}>
             ₹{spot.pricePerHour}
           </p>
-          <p className="text-[9px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: "rgba(34, 197, 94, 0.7)" }}>/hour</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: "rgba(34, 197, 94, 0.8)" }}>/hour</p>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="mb-3" style={{ 
+      <div className="mb-4" style={{ 
         height: "2px", 
-        background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 10%), transparent)"
+        background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 12%), transparent)"
       }} />
 
       {/* Meta row */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
 
           {/* Type pill */}
           <span
-            className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-xl capitalize transition-all duration-200 hover:scale-105"
+            className="flex items-center gap-2 text-[11px] font-bold px-3.5 py-2 rounded-xl capitalize transition-all duration-200 hover:scale-105"
             style={{
-              background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 18%), oklch(0.488 0.243 264.376 / 8%))",
+              background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 22%), oklch(0.488 0.243 264.376 / 10%))",
               color: "oklch(0.809 0.105 251.813)",
-              border: "1.5px solid oklch(0.623 0.214 259.815 / 30%)",
-              boxShadow: "0 2px 10px rgba(74, 158, 173, 0.15)"
+              border: "2px solid oklch(0.623 0.214 259.815 / 35%)",
+              boxShadow: "0 3px 12px rgba(74, 158, 173, 0.2)"
             }}
           >
             <span style={{ color: "oklch(0.809 0.105 251.813)" }}>
@@ -138,12 +141,12 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
 
           {/* Size badge */}
           <span
-            className="flex items-center justify-center h-8 w-8 rounded-xl text-xs font-black transition-all duration-200 hover:scale-105"
+            className="flex items-center justify-center h-9 w-9 rounded-xl text-xs font-black transition-all duration-200 hover:scale-105"
             style={{
-              background: `linear-gradient(135deg, ${sizeColor[spot.size]}25, ${sizeColor[spot.size]}15)`,
+              background: `linear-gradient(135deg, ${sizeColor[spot.size]}30, ${sizeColor[spot.size]}18)`,
               color: sizeColor[spot.size],
-              border: `1.5px solid ${sizeColor[spot.size]}40`,
-              boxShadow: `0 2px 10px ${sizeColor[spot.size]}20`
+              border: `2px solid ${sizeColor[spot.size]}45`,
+              boxShadow: `0 3px 12px ${sizeColor[spot.size]}25`
             }}
           >
             {sizeLabel[spot.size]}
@@ -152,11 +155,11 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
           {/* Distance */}
           {spot.distance !== undefined && (
             <span
-              className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl"
+              className="flex items-center gap-2 text-[11px] font-semibold px-3.5 py-2 rounded-xl"
               style={{
-                background: "oklch(1 0 0 / 8%)",
+                background: "oklch(1 0 0 / 10%)",
                 color: "oklch(0.708 0 0)",
-                border: "1.5px solid oklch(1 0 0 / 12%)",
+                border: "2px solid oklch(1 0 0 / 15%)",
               }}
             >
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -168,9 +171,10 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
         </div>
 
         {/* Status dot */}
-        <div className="flex items-center gap-2 flex-shrink-0 px-2.5 py-1.5 rounded-xl" style={{
-          background: isFree ? "rgba(34, 197, 94, 0.1)" : "rgba(239, 68, 68, 0.1)",
-          border: `1.5px solid ${isFree ? "rgba(34, 197, 94, 0.3)" : "rgba(239, 68, 68, 0.3)"}`
+        <div className="flex items-center gap-2.5 flex-shrink-0 px-3.5 py-2 rounded-xl" style={{
+          background: isFree ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+          border: `2px solid ${isFree ? "rgba(34, 197, 94, 0.35)" : "rgba(239, 68, 68, 0.35)"}`,
+          boxShadow: `0 3px 12px ${isFree ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)"}`
         }}>
           <span
             className="h-2 w-2 rounded-full flex-shrink-0 animate-pulse"
@@ -190,15 +194,15 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
 
       {/* Rating (if present) */}
       {spot.averageRating && (
-        <div className="mt-3 pt-3 flex items-center gap-2" style={{
-          borderTop: "1px solid oklch(1 0 0 / 6%)"
+        <div className="mt-4 pt-4 flex items-center gap-2.5" style={{
+          borderTop: "2px solid oklch(1 0 0 / 8%)"
         }}>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <svg
                 key={star}
-                width="12"
-                height="12"
+                width="13"
+                height="13"
                 viewBox="0 0 24 24"
                 fill={star <= Math.round(spot.averageRating!) ? "#f59e0b" : "none"}
                 stroke="#f59e0b"
@@ -211,15 +215,15 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
           <span className="text-xs font-bold" style={{ color: "#f59e0b" }}>
             {spot.averageRating.toFixed(1)}
           </span>
-          <span className="text-[10px]" style={{ color: "oklch(0.556 0 0)" }}>
+          <span className="text-[10px] font-medium" style={{ color: "oklch(0.556 0 0)" }}>
             rating
           </span>
         </div>
       )}
       
       {/* Hover indicator */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{
-        boxShadow: "0 0 0 2px oklch(0.623 0.214 259.815 / 20%)"
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" style={{
+        boxShadow: "0 0 0 3px oklch(0.623 0.214 259.815 / 25%), 0 8px 24px rgba(74, 158, 173, 0.2)"
       }} />
     </div>
   );
