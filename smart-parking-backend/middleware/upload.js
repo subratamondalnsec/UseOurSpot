@@ -1,6 +1,5 @@
 // Upload middleware — Smart Parking System
-// Stack: busboy (parse incoming multipart) + file-uploader (POST to remote storage)
-// multer has been removed
+// Uses: busboy (parse incoming multipart/form-data) + file-uploader (POST to remote storage)
 
 const busboy = require('busboy');
 const path   = require('path');
