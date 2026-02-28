@@ -1,15 +1,27 @@
 // Auth Routes — /api/auth
 const express = require('express');
-const router = express.Router();
-// const { register, login, getMe, forgotPassword, resetPassword } = require('../controllers/authController');
+const router  = express.Router();
+const {
+  registerUser,
+  loginUser,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
+} = require('../controllers/authController');
 
 // POST /api/auth/register
-router.post('/register', (req, res) => res.json({ message: 'register endpoint — controller coming soon' }));
+router.post('/register', registerUser);
 
 // POST /api/auth/login
-router.post('/login', (req, res) => res.json({ message: 'login endpoint — controller coming soon' }));
+router.post('/login', loginUser);
 
-// GET /api/auth/me  (protected)
-router.get('/me', (req, res) => res.json({ message: 'getMe endpoint — controller coming soon' }));
+// POST /api/auth/logout
+router.post('/logout', logoutUser);
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', forgotPassword);
+
+// PUT /api/auth/reset-password/:token
+router.put('/reset-password/:token', resetPassword);
 
 module.exports = router;
