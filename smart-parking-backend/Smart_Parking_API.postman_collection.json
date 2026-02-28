@@ -1,0 +1,898 @@
+{
+	"info": {
+		"_postman_id": "smart-parking-2024",
+		"name": "Smart Parking API - Complete Collection",
+		"description": "Complete API collection for Smart Parking Platform with all endpoints and realistic test data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "spotId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookingId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Register User (Driver)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Driver\",\n  \"email\": \"driver@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"driver\",\n  \"phone\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register a new driver user"
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Owner)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Sarah Owner\",\n  \"email\": \"owner@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"owner\",\n  \"phone\": \"+1987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register a new parking spot owner"
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@smartparking.com\",\n  \"password\": \"admin123456\",\n  \"role\": \"admin\",\n  \"phone\": \"+1555000000\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register admin user"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"driver@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login user and get JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"driver@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "forgot-password"]
+						},
+						"description": "Send password reset email"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newPassword\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password/your-reset-token-here",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "reset-password", "your-reset-token-here"]
+						},
+						"description": "Reset password using token from email"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Logout user and clear token"
+					},
+					"response": []
+				}
+			],
+			"description": "User authentication endpoints"
+		},
+		{
+			"name": "🏠 Owner APIs",
+			"item": [
+				{
+					"name": "Add Parking Spot",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('spotId', jsonData.spot._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "address",
+									"value": "123 Main Street, Downtown, New York, NY 10001",
+									"type": "text"
+								},
+								{
+									"key": "coordinates[lat]",
+									"value": "40.7128",
+									"type": "text"
+								},
+								{
+									"key": "coordinates[lng]",
+									"value": "-74.0060",
+									"type": "text"
+								},
+								{
+									"key": "size",
+									"value": "medium",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "covered",
+									"type": "text"
+								},
+								{
+									"key": "rules",
+									"value": "No overnight parking. Maximum 6 hours. Compact cars only. Keep the area clean.",
+									"type": "text"
+								},
+								{
+									"key": "availability",
+									"value": "always",
+									"type": "text"
+								},
+								{
+									"key": "availableFrom",
+									"value": "08:00",
+									"type": "text"
+								},
+								{
+									"key": "availableTo",
+									"value": "22:00",
+									"type": "text"
+								},
+								{
+									"key": "pricePerHour",
+									"value": "15",
+									"type": "text"
+								},
+								{
+									"key": "photos",
+									"type": "file",
+									"src": [],
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/owner/add-spot",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "add-spot"]
+						},
+						"description": "Add a new parking spot (Owner only). Upload photos using form-data."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Spots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/owner/my-spots",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "my-spots"]
+						},
+						"description": "Get all parking spots owned by logged-in user"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Parking Spot",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "address",
+									"value": "123 Main Street, Downtown, New York, NY 10001 (Updated)",
+									"type": "text"
+								},
+								{
+									"key": "pricePerHour",
+									"value": "18",
+									"type": "text"
+								},
+								{
+									"key": "rules",
+									"value": "Updated rules: No overnight parking. Maximum 8 hours.",
+									"type": "text"
+								},
+								{
+									"key": "photos",
+									"type": "file",
+									"src": [],
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/owner/edit-spot/{{spotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "edit-spot", "{{spotId}}"]
+						},
+						"description": "Update parking spot details. Replace {{spotId}} with actual spot ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Parking Spot",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/owner/delete-spot/{{spotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "delete-spot", "{{spotId}}"]
+						},
+						"description": "Delete a parking spot. Replace {{spotId}} with actual spot ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Earnings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/owner/earnings",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "earnings"]
+						},
+						"description": "Get total earnings from all owned parking spots"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Spot Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/owner/spot-status/{{spotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["owner", "spot-status", "{{spotId}}"]
+						},
+						"description": "Check if spot is free or occupied with active booking details"
+					},
+					"response": []
+				}
+			],
+			"description": "Parking spot owner management APIs"
+		},
+		{
+			"name": "🚗 Driver APIs",
+			"item": [
+				{
+					"name": "Search Parking Spots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/driver/search?lat=40.7128&lng=-74.0060&maxPrice=25&type=covered&size=medium",
+							"host": ["{{baseUrl}}"],
+							"path": ["driver", "search"],
+							"query": [
+								{
+									"key": "lat",
+									"value": "40.7128",
+									"description": "User's latitude"
+								},
+								{
+									"key": "lng",
+									"value": "-74.0060",
+									"description": "User's longitude"
+								},
+								{
+									"key": "maxPrice",
+									"value": "25",
+									"description": "Maximum price per hour"
+								},
+								{
+									"key": "type",
+									"value": "covered",
+									"description": "open or covered"
+								},
+								{
+									"key": "size",
+									"value": "medium",
+									"description": "small, medium, or large"
+								}
+							]
+						},
+						"description": "Search for available parking spots with filters. Results sorted by distance."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Spots (All Available)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/driver/search",
+							"host": ["{{baseUrl}}"],
+							"path": ["driver", "search"]
+						},
+						"description": "Get all available parking spots without filters"
+					},
+					"response": []
+				}
+			],
+			"description": "Driver search and discovery APIs"
+		},
+		{
+			"name": "📅 Booking APIs",
+			"item": [
+				{
+					"name": "Create Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('bookingId', jsonData.booking._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"spotId\": \"{{spotId}}\",\n  \"startTime\": \"2026-03-01T09:00:00.000Z\",\n  \"endTime\": \"2026-03-01T14:00:00.000Z\",\n  \"carLocation\": {\n    \"lat\": 40.7128,\n    \"lng\": -74.0060\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/booking/create",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "create"]
+						},
+						"description": "Create a new parking booking with QR code. Replace {{spotId}} with actual spot ID from search results."
+					},
+					"response": []
+				},
+				{
+					"name": "Scan QR Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"{{bookingId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/booking/scan-qr",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "scan-qr"]
+						},
+						"description": "Verify booking QR code and get booking details"
+					},
+					"response": []
+				},
+				{
+					"name": "End Parking Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"{{bookingId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/booking/end-session",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "end-session"]
+						},
+						"description": "End parking session and calculate final amount with overstay charges"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/booking/my-bookings",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "my-bookings"]
+						},
+						"description": "Get all bookings for logged-in driver"
+					},
+					"response": []
+				},
+				{
+					"name": "Extend Booking Time",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"extraMinutes\": 60\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/booking/extend",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "extend"]
+						},
+						"description": "Extend active booking by additional minutes (charges applied)"
+					},
+					"response": []
+				},
+				{
+					"name": "Rate Parking Spot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent parking spot! Very clean and secure. Easy access to downtown. Highly recommended!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/booking/rate",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "rate"]
+						},
+						"description": "Rate a parking spot after completing booking (1-5 stars)"
+					},
+					"response": []
+				},
+				{
+					"name": "Find My Car",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/booking/find-my-car/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["booking", "find-my-car", "{{bookingId}}"]
+						},
+						"description": "Get saved car location (GPS coordinates) for a booking"
+					},
+					"response": []
+				}
+			],
+			"description": "Booking management and parking session APIs"
+		},
+		{
+			"name": "👨‍💼 Admin APIs",
+			"item": [
+				{
+					"name": "Get Pending Spots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/pending-spots",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "pending-spots"]
+						},
+						"description": "Get all parking spots pending approval (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Parking Spot",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/approve-spot/{{spotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "approve-spot", "{{spotId}}"]
+						},
+						"description": "Approve a parking spot to make it visible to drivers (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Parking Spot",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/remove-spot/{{spotId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "remove-spot", "{{spotId}}"]
+						},
+						"description": "Permanently delete any parking spot (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users"]
+						},
+						"description": "Get list of all registered users (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Heatmap Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/heatmap",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "heatmap"]
+						},
+						"description": "Get all approved spots with coordinates for heatmap visualization (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "stats"]
+						},
+						"description": "Get platform statistics: total users, spots, bookings, and revenue (Admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin panel and monitoring APIs"
+		},
+		{
+			"name": "🏥 Health Check",
+			"item": [
+				{
+					"name": "API Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5000",
+							"path": [""]
+						},
+						"description": "Check if API server is running"
+					},
+					"response": []
+				}
+			],
+			"description": "Server health and status checks"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
