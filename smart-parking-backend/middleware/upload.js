@@ -1,79 +1,109 @@
 // Upload middleware — Smart Parking System
-// Uses: file-uploader (npm i file-uploader) to POST files to remote storage
-//       multer (memory storage) to parse incoming multipart/form-data from client
+// Stack: busboy (parse incoming multipart) + file-uploader (POST to remote storage)
+// multer has been removed
 
-const multer  = require('multer');
-const path    = require('path');
-const fs      = require('fs');
-const fu      = require('file-uploader');
+const busboy = require('busboy');
+const path   = require('path');
+const fs     = require('fs');
+const fu     = require('file-uploader');
 
-// ── 1. Multer — parse incoming file from client (held in memory) ──
-const memoryStorage = multer.memoryStorage();
+/**
+ * parseUpload(fieldName)
+ * Express middleware — parses a single file from multipart/form-data using busboy.
+ * Saves the file to /uploads locally, then attaches it to req.uploadedFile:
+ *   req.uploadedFile = { path, filename, mimetype, size }
+ *
+ * Usage in routes:
+ *   router.post('/spots', parseUpload('photo'), controller);
+ */
+const parseUpload = (fieldName = 'file') => (req, res, next) => {
+  // Only handle multipart requests
+  if (!req.headers['content-type']?.includes('multipart/form-data')) {
+    return next();
+  }
 
-const fileFilter = (req, file, cb) => {
-  const allowedExts = /jpeg|jpg|png|webp/;
-  const isValid = allowedExts.test(path.extname(file.originalname).toLowerCase());
-  if (isValid) cb(null, true);
-  else cb(new Error('Only image files allowed: jpeg, jpg, png, webp'));
+  const bb = busboy({ headers: req.headers, limits: { fileSize: 5 * 1024 * 1024 } }); // 5 MB
+
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  let handled = false;
+
+  bb.on('file', (name, stream, info) => {
+    if (name !== fieldName) { stream.resume(); return; } // skip other fields
+
+    const { filename, mimeType } = info;
+
+    // Validate image type
+    const allowed = /\.(jpe?g|png|webp)$/i;
+    if (!allowed.test(filename)) {
+      stream.resume();
+      return next(new Error('Only image files allowed: jpeg, jpg, png, webp'));
+    }
+
+    const saveName  = `${Date.now()}-${filename}`;
+    const savePath  = path.join(uploadsDir, saveName);
+    const writeStream = fs.createWriteStream(savePath);
+
+    let size = 0;
+    stream.on('data', (chunk) => { size += chunk.length; });
+    stream.pipe(writeStream);
+
+    writeStream.on('finish', () => {
+      req.uploadedFile = { path: savePath, filename: saveName, mimetype: mimeType, size };
+      handled = true;
+    });
+  });
+
+  bb.on('finish', () => {
+    if (!handled) req.uploadedFile = null;
+    next();
+  });
+
+  bb.on('error', (err) => next(err));
+
+  req.pipe(bb);
 };
 
-// Export as Express middleware for routes (e.g. upload.single('photo'))
-const upload = multer({
-  storage: memoryStorage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
-});
-
-// ── 2. file-uploader — POST the parsed file to remote storage ─────
 /**
- * Saves buffer to a temp file then uses file-uploader to POST it to
- * the configured UPLOAD_ENDPOINT in .env.
+ * uploadToRemote(filePath, headers?)
+ * Uses file-uploader to POST a local file to the UPLOAD_ENDPOINT in .env.
+ * Call this inside your controller after parseUpload middleware.
  *
- * @param {Buffer} fileBuffer   - The in-memory file buffer from multer
- * @param {string} originalName - Original filename (used for extension)
- * @param {Object} [headers]    - Extra HTTP headers (e.g. Authorization)
- * @returns {Promise<Object>}   - Remote server response body
+ * @param {string} filePath  - Absolute path to the local file
+ * @param {Object} [headers] - Extra HTTP headers (e.g. Authorization)
+ * @returns {Promise<Object>} Remote server response
+ *
+ * Example in controller:
+ *   const { uploadToRemote } = require('../middleware/upload');
+ *   const stored = await uploadToRemote(req.uploadedFile.path);
  */
-const uploadToRemote = (fileBuffer, originalName, headers = {}) => {
+const uploadToRemote = (filePath, headers = {}) => {
   return new Promise((resolve, reject) => {
-    const uploadEndpoint = process.env.UPLOAD_ENDPOINT || 'http://localhost:5000/uploads';
-    const url = new URL(uploadEndpoint);
+    const endpoint = process.env.UPLOAD_ENDPOINT || 'http://localhost:5000/uploads';
+    const url = new URL(endpoint);
 
-    const tmpDir      = path.join(__dirname, '..', 'uploads');
-    const tmpFilename = `${Date.now()}-${originalName}`;
-    const tmpPath     = path.join(tmpDir, tmpFilename);
+    const options = {
+      host:     url.hostname,
+      port:     parseInt(url.port) || (url.protocol === 'https:' ? 443 : 80),
+      path:     url.pathname,
+      method:   'POST',
+      encoding: 'utf8',
+      keyname:  'file',
+    };
 
-    // Ensure uploads dir exists
-    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    fu.postFile(options, filePath, headers, (err, response) => {
+      // Clean up local temp file after upload
+      fs.unlink(filePath, () => {});
 
-    // Write buffer to temp file
-    fs.writeFile(tmpPath, fileBuffer, (writeErr) => {
-      if (writeErr) return reject(writeErr);
-
-      const options = {
-        host:     url.hostname,
-        port:     parseInt(url.port) || (url.protocol === 'https:' ? 443 : 80),
-        path:     url.pathname,
-        method:   'POST',
-        encoding: 'utf8',
-        keyname:  'file',
-      };
-
-      // Use file-uploader to POST the file to the remote endpoint
-      fu.postFile(options, tmpPath, headers, (err, response) => {
-        // Clean up temp file
-        fs.unlink(tmpPath, () => {});
-
-        if (err) return reject(err);
-
-        try {
-          resolve(JSON.parse(response.body));
-        } catch {
-          resolve({ body: response.body, statusCode: response.statusCode });
-        }
-      });
+      if (err) return reject(err);
+      try {
+        resolve(JSON.parse(response.body));
+      } catch {
+        resolve({ body: response.body, statusCode: response.statusCode });
+      }
     });
   });
 };
 
-module.exports = { upload, uploadToRemote };
+module.exports = { parseUpload, uploadToRemote };
