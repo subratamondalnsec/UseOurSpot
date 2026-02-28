@@ -1,0 +1,39 @@
+import { RouteData } from '@/types';
+
+/**
+ * Fetch driving route from OSRM API
+ * @param driverLat - Driver's latitude
+ * @param driverLng - Driver's longitude
+ * @param spotLat - Parking spot's latitude
+ * @param spotLng - Parking spot's longitude
+ * @returns Route data with geometry, distance, and duration
+ */
+export async function getRoute(
+  driverLat: number,
+  driverLng: number,
+  spotLat: number,
+  spotLng: number
+): Promise<RouteData | null> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${driverLng},${driverLat};${spotLng},${spotLat}?geometries=geojson&overview=full`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+      console.error('OSRM API error:', data);
+      return null;
+    }
+
+    const route = data.routes[0];
+
+    return {
+      geometry: route.geometry,
+      distance: route.distance, // meters
+      duration: route.duration, // seconds
+    };
+  } catch (error) {
+    console.error('Error fetching route:', error);
+    return null;
+  }
+}
