@@ -1,23 +1,26 @@
-// Booking Routes — /api/bookings
+// Booking Routes — /api/booking
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+const { protect } = require('../middleware/authMiddleware');
+const {
+  createBooking,
+  scanQR,
+  endSession,
+  myBookings,
+  extendTime,
+  rateSpot,
+  findMyCar,
+} = require('../controllers/bookingController');
 
-// POST /api/bookings              — driver creates booking + QR
-router.post('/', (req, res) => res.json({ message: 'POST create booking — controller coming soon' }));
+// All routes require login
+router.use(protect);
 
-// GET  /api/bookings/my           — driver: my bookings
-router.get('/my', (req, res) => res.json({ message: 'GET my bookings — controller coming soon' }));
-
-// GET  /api/bookings/:id          — booking details
-router.get('/:id', (req, res) => res.json({ message: 'GET booking by id — controller coming soon' }));
-
-// PUT  /api/bookings/:id/cancel   — driver cancels
-router.put('/:id/cancel', (req, res) => res.json({ message: 'PUT cancel booking — controller coming soon' }));
-
-// PUT  /api/bookings/:id/checkin  — checkin via QR scan
-router.put('/:id/checkin', (req, res) => res.json({ message: 'PUT checkin — controller coming soon' }));
-
-// PUT  /api/bookings/:id/checkout — checkout + overstay charge
-router.put('/:id/checkout', (req, res) => res.json({ message: 'PUT checkout — controller coming soon' }));
+router.post('/create',                 createBooking);
+router.post('/scan-qr',                scanQR);
+router.post('/end-session',            endSession);
+router.get('/my-bookings',             myBookings);
+router.post('/extend',                 extendTime);
+router.post('/rate',                   rateSpot);
+router.get('/find-my-car/:bookingId',  findMyCar);
 
 module.exports = router;
