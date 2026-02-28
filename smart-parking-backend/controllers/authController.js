@@ -101,74 +101,74 @@ exports.logoutUser = (req, res) => {
 
 // ─── @route  POST /api/auth/forgot-password ─────────────────
 // ─── @access Public
-// exports.forgotPassword = async (req, res) => {
-//   try {
-//     const { email } = req.body;
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
 
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'No user with that email' });
-//     }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No user with that email' });
+    }
 
-//     // Generate raw token & hash it for storage
-//     const rawToken   = crypto.randomBytes(20).toString('hex');
-//     const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    // Generate raw token & hash it for storage
+    const rawToken   = crypto.randomBytes(20).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-//     user.resetPasswordToken  = hashedToken;
-//     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
-//     await user.save({ validateBeforeSave: false });
+    user.resetPasswordToken  = hashedToken;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    await user.save({ validateBeforeSave: false });
 
-//     // Build reset link (raw token — not the hash)
-//     const resetLink = `http://localhost:3000/reset-password/${rawToken}`;
+    // Build reset link (raw token — not the hash)
+    const resetLink = `http://localhost:3000/reset-password/${rawToken}`;
 
-//     // Send reset link via shared sendEmail utility
-//     await sendEmail({
-//       to:      user.email,
-//       subject: 'Password Reset Request',
-//       html: `
-//         <h2>Password Reset</h2>
-//         <p>You requested a password reset. Click the link below (valid for 15 minutes):</p>
-//         <a href="${resetLink}">${resetLink}</a>
-//         <p>If you did not request this, ignore this email.</p>
-//       `,
-//     });
+    // Send reset link via shared sendEmail utility
+    await sendEmail({
+      to:      user.email,
+      subject: 'Password Reset Request',
+      html: `
+        <h2>Password Reset</h2>
+        <p>You requested a password reset. Click the link below (valid for 15 minutes):</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>If you did not request this, ignore this email.</p>
+      `,
+    });
 
-//     res.json({ success: true, message: 'Email sent' });
-//   } catch (error) {
-//     console.error('forgotPassword error:', error.message);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
+    res.json({ success: true, message: 'Email sent' });
+  } catch (error) {
+    console.error('forgotPassword error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 
-// // ─── @route  PUT /api/auth/reset-password/:token ────────────
-// // ─── @access Public
-// exports.resetPassword = async (req, res) => {
-//   try {
-//     const { token }       = req.params;
-//     const { newPassword } = req.body;
+// ─── @route  PUT /api/auth/reset-password/:token ────────────
+// ─── @access Public
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token }       = req.params;
+    const { newPassword } = req.body;
 
-//     // Hash the incoming raw token to match stored hash
-//     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    // Hash the incoming raw token to match stored hash
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-//     const user = await User.findOne({
-//       resetPasswordToken:  hashedToken,
-//       resetPasswordExpire: { $gt: Date.now() },
-//     });
+    const user = await User.findOne({
+      resetPasswordToken:  hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
 
-//     if (!user) {
-//       return res.status(400).json({ success: false, message: 'Invalid or expired token' });
-//     }
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    }
 
-//     // Hash new password & clear reset fields
-//     const salt           = await bcrypt.genSalt(10);
-//     user.password        = await bcrypt.hash(newPassword, salt);
-//     user.resetPasswordToken  = undefined;
-//     user.resetPasswordExpire = undefined;
-//     await user.save();
+    // Hash new password & clear reset fields
+    const salt           = await bcrypt.genSalt(10);
+    user.password        = await bcrypt.hash(newPassword, salt);
+    user.resetPasswordToken  = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
 
-//     res.json({ success: true, message: 'Password reset successful' });
-//   } catch (error) {
-//     console.error('resetPassword error:', error.message);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
+    res.json({ success: true, message: 'Password reset successful' });
+  } catch (error) {
+    console.error('resetPassword error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
