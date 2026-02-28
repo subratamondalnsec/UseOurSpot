@@ -1,5 +1,4 @@
 // User Model — Smart Parking System
-// TODO: Define User schema (Owner / Driver / Admin roles)
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
