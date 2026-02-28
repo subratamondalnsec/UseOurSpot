@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 from pymongo import MongoClient
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics.pairwise import cosine_similarity
-import math
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["your_database_name"]
+MONGO_URI = os.getenv("MONGO_URI")
+
+client = MongoClient(MONGO_URI)
+db = client["smart_parking"]
 parking_collection = db["parkingspots"]
 
 # -------------------------------

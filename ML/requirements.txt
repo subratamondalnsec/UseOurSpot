@@ -7,3 +7,4 @@ easyocr
 Flask
 pymongo
 scikit-learn
+python-dotenv
