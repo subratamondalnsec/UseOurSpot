@@ -1,139 +1,196 @@
 "use client";
 
-import Image from 'next/image';
-import { MapPin, Star } from 'lucide-react';
-import { SpotCardProps } from '@/types';
+import { ParkingSpot } from "@/types";
 
-export default function SpotCard({ spot, isNearest = false, onClick }: SpotCardProps) {
-  // Get type badge styling
-  const getTypeBadgeClass = (type: string): string => {
-    if (type === 'covered') {
-      return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
-    }
-    if (type === 'garage') {
-      return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
-    }
-    return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
-  };
+interface SpotCardProps {
+  spot: ParkingSpot;
+  isNearest?: boolean;
+  onClick: () => void;
+}
+
+const typeIcon: Record<string, React.ReactNode> = {
+  open: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+    </svg>
+  ),
+  covered: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  ),
+  garage: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <line x1="12" y1="12" x2="12" y2="16" /><line x1="10" y1="14" x2="14" y2="14" />
+    </svg>
+  ),
+};
+
+const sizeLabel: Record<string, string> = {
+  small: "S",
+  medium: "M",
+  large: "L",
+};
+
+const sizeColor: Record<string, string> = {
+  small: "#f59e0b",
+  medium: "oklch(0.623 0.214 259.815)",
+  large: "#a78bfa",
+};
+
+export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
+  const isFree = spot.status === "free";
+  const isApproved = spot.isApproved;
 
   return (
-    <button
+    <div
       onClick={onClick}
-      className={`relative w-full text-left bg-[#08090f] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl border-2 ${
-        isNearest
-          ? 'border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-          : 'border-[#4A9EAD]/20 hover:border-[#4A9EAD]/50'
-      }`}
+      className="group relative rounded-xl p-4 cursor-pointer transition-all duration-200 hover:scale-[1.01]"
+      style={{
+        background: "oklch(1 0 0 / 4%)",
+        border: "1px solid oklch(1 0 0 / 8%)",
+      }}
     >
-      {/* Nearest Badge */}
-      {isNearest && (
-        <div className="absolute top-3 right-3 z-10 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-          🏆 Nearest Spot
+      {/* Top row: title + price */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            {isNearest && (
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{
+                  background: "oklch(0.488 0.243 264.376 / 20%)",
+                  color: "oklch(0.809 0.105 251.813)",
+                  border: "1px solid oklch(0.623 0.214 259.815 / 30%)",
+                }}
+              >
+                Nearest
+              </span>
+            )}
+            {!isApproved && (
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{
+                  background: "#f59e0b18",
+                  color: "#f59e0b",
+                  border: "1px solid #f59e0b30",
+                }}
+              >
+                Pending
+              </span>
+            )}
+          </div>
+          <p className="text-sm font-semibold text-white truncate leading-snug">
+            {spot.title || spot.address}
+          </p>
+          {spot.title && (
+            <p className="text-xs truncate mt-0.5" style={{ color: "oklch(0.556 0 0)" }}>
+              {spot.address}
+            </p>
+          )}
         </div>
-      )}
 
-      {/* Spot Image */}
-      <div className="relative h-48 w-full bg-gradient-to-br from-[#4A9EAD]/10 to-[#0a0d14]">
-        {spot.photos && spot.photos.length > 0 ? (
-          <Image
-            src={spot.photos[0]}
-            alt={spot.address || 'Parking spot'}
-            fill
-            className="object-cover"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.style.display = 'none';
+        {/* Price */}
+        <div className="flex-shrink-0 text-right">
+          <p className="text-base font-bold" style={{ color: "#22c55e" }}>
+            ₹{spot.pricePerHour}
+          </p>
+          <p className="text-[10px]" style={{ color: "oklch(0.556 0 0)" }}>/hr</p>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="mb-3" style={{ height: "1px", background: "oklch(1 0 0 / 6%)" }} />
+
+      {/* Meta row */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+
+          {/* Type pill */}
+          <span
+            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg capitalize"
+            style={{
+              background: "oklch(0.488 0.243 264.376 / 12%)",
+              color: "oklch(0.708 0 0)",
+              border: "1px solid oklch(1 0 0 / 8%)",
+            }}
+          >
+            <span style={{ color: "oklch(0.809 0.105 251.813)" }}>
+              {typeIcon[spot.type] ?? typeIcon.open}
+            </span>
+            {spot.type}
+          </span>
+
+          {/* Size badge */}
+          <span
+            className="flex items-center justify-center h-6 w-6 rounded-lg text-[11px] font-bold"
+            style={{
+              background: sizeColor[spot.size] + "18",
+              color: sizeColor[spot.size],
+              border: `1px solid ${sizeColor[spot.size]}30`,
+            }}
+          >
+            {sizeLabel[spot.size]}
+          </span>
+
+          {/* Distance */}
+          {spot.distance !== undefined && (
+            <span
+              className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg"
+              style={{
+                background: "oklch(1 0 0 / 5%)",
+                color: "oklch(0.708 0 0)",
+                border: "1px solid oklch(1 0 0 / 8%)",
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              {spot.distance.toFixed(1)} km
+            </span>
+          )}
+        </div>
+
+        {/* Status dot */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span
+            className="h-2 w-2 rounded-full flex-shrink-0"
+            style={{
+              background: isFree ? "#22c55e" : "#ef4444",
+              boxShadow: `0 0 6px ${isFree ? "#22c55e" : "#ef4444"}`,
             }}
           />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-600">
-            <div className="text-center">
-              <MapPin className="w-16 h-16 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No image available</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-      </div>
-
-      {/* Card Content */}
-      <div className="p-5 space-y-3">
-        {/* Address */}
-        <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight">
-          {spot.address || spot.title || 'Parking Spot'}
-        </h3>
-
-        {/* Price and Distance Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-black text-green-400">
-              ₹{spot.pricePerHour}
-            </span>
-            <span className="text-gray-400 text-sm">/hr</span>
-          </div>
-          
-          <div className="flex items-center gap-1 text-[#4A9EAD] font-semibold">
-            <MapPin className="w-4 h-4" />
-            <span>{spot.distance ? spot.distance.toFixed(1) : 'N/A'} km</span>
-          </div>
-        </div>
-
-        {/* Type Badge and Rating */}
-        <div className="flex items-center justify-between">
-          {/* Type Badge */}
-          {spot.type && (
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase ${getTypeBadgeClass(spot.type)}`}>
-              {spot.type}
-            </span>
-          )}
-
-          {/* Rating */}
-          {spot.averageRating !== undefined && spot.averageRating > 0 && (
-            <div className="flex items-center gap-1 text-yellow-400">
-              <Star className="w-4 h-4 fill-yellow-400" />
-              <span className="font-bold text-sm">
-                {spot.averageRating.toFixed(1)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Size Badge (if available) */}
-        {spot.size && (
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span>Size:</span>
-            <span className="text-white font-semibold capitalize">{spot.size}</span>
-          </div>
-        )}
-
-        {/* View on Map Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-          className="w-full bg-gradient-to-r from-[#4A9EAD] to-[#5fbecc] text-white font-bold py-3 px-6 rounded-xl hover:shadow-[0_8px_30px_rgba(74,158,173,0.5)] transition-all mt-2"
-        >
-          View on Map
-        </button>
-      </div>
-
-      {/* Availability Badge (if status available) */}
-      {spot.status && (
-        <div className="absolute top-3 left-3 z-10">
           <span
-            className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${
-              spot.status === 'free'
-                ? 'bg-green-500/90 text-white'
-                : 'bg-red-500/90 text-white'
-            }`}
+            className="text-[11px] font-medium"
+            style={{ color: isFree ? "#22c55e" : "#ef4444" }}
           >
-            {spot.status === 'free' ? '✓ Available' : '✗ Occupied'}
+            {isFree ? "Free" : "Occupied"}
+          </span>
+        </div>
+      </div>
+
+      {/* Rating (if present) */}
+      {spot.averageRating && (
+        <div className="mt-2.5 flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <svg
+              key={star}
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill={star <= Math.round(spot.averageRating!) ? "#f59e0b" : "none"}
+              stroke="#f59e0b"
+              strokeWidth="1.5"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          ))}
+          <span className="text-[10px] ml-1" style={{ color: "oklch(0.556 0 0)" }}>
+            {spot.averageRating.toFixed(1)}
           </span>
         </div>
       )}
-    </button>
+    </div>
   );
 }
