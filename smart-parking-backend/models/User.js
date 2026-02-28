@@ -1,6 +1,8 @@
 // User Model — Smart Parking System
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+// Import the car schema
+const carSchema = require('./Car').schema;
 
 const userSchema = new mongoose.Schema(
   {
@@ -13,6 +15,7 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: true },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    cars: [carSchema] // Array of embedded car documents
   },
   { timestamps: true }
 );
