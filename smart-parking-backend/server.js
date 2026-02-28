@@ -13,35 +13,34 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
-// ─── Middleware ──────────────────────────────────────────────
-// 1. JSON body parser
-app.use(express.json());
-
-// 2. Cookie parser
-app.use(cookieParser());
-
-// 3. CORS — allow only listed origins
+// ─── CORS ────────────────────────────────────────────────────
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5174',
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-// 4. File upload — temp files stored in /tmp/
+// Handle preflight (OPTIONS) requests for ALL routes — Express 5 wildcard syntax
+app.options('/{*path}', cors(corsOptions));
+
+// Apply CORS to all other requests
+app.use(cors(corsOptions));
+
+// ─── Middleware ──────────────────────────────────────────────
+// JSON body parser
+app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
+
+// File upload — temp files stored in /tmp/
 app.use(
   fileUpload({
     useTempFiles: true,
