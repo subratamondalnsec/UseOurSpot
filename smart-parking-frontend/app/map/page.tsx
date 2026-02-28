@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import SpotCard from '@/components/DriverSerchingSpot/SpotCard';
-import { Navigation, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
+import { Navigation, SlidersHorizontal, MapPin, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ParkingSpot, Location, ParkingFilters } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,6 +93,7 @@ export default function MapView() {
   const [spotsLoading, setSpotsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -159,51 +160,125 @@ export default function MapView() {
 
           {/* Sidebar Header */}
           <div
-            className="p-6 flex-shrink-0"
+            className="p-6 flex-shrink-0 relative overflow-hidden"
             style={{
-              background: "oklch(0.145 0 0 / 92%)",
-              backdropFilter: "blur(20px)",
-              borderBottom: "1px solid oklch(1 0 0 / 8%)",
+              background: "linear-gradient(180deg, oklch(0.145 0 0 / 95%) 0%, oklch(0.145 0 0 / 92%) 100%)",
+              backdropFilter: "blur(30px)",
+              borderBottom: "2px solid oklch(1 0 0 / 10%)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)"
             }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-xl"
-                style={{ background: "oklch(0.488 0.243 264.376 / 15%)", color: "oklch(0.809 0.105 251.813)" }}
-              >
-                <Navigation size={18} />
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-5" style={{
+              backgroundImage: "radial-gradient(circle at 2px 2px, oklch(1 0 0) 1px, transparent 0)",
+              backgroundSize: "30px 30px"
+            }} />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300 hover:scale-110 hover:rotate-3"
+                  style={{ 
+                    background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 30%), oklch(0.623 0.214 259.815 / 20%))",
+                    color: "oklch(0.809 0.105 251.813)",
+                    boxShadow: "0 8px 20px rgba(74, 158, 173, 0.3), inset 0 1px 0 0 oklch(1 0 0 / 10%)"
+                  }}
+                >
+                  <Navigation size={20} className="animate-pulse" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black tracking-tight" style={{
+                    background: "linear-gradient(135deg, oklch(0.87 0 0), oklch(0.809 0.105 251.813))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text"
+                  }}>Find Parking</h2>
+                  <p className="text-xs font-medium flex items-center gap-1.5" style={{ color: "oklch(0.708 0 0)" }}>
+                    <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.623 0.214 259.815)" }} />
+                    Near your location
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-bold text-white">Find Parking</h2>
-                <p className="text-xs" style={{ color: "oklch(0.556 0 0)" }}>Near your location</p>
-              </div>
-            </div>
 
-            {/* Filters */}
-            <FieldGroup className="gap-4">
+              {/* Filters Title - Collapsible */}
+              <button
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+                className="mb-4 flex items-center justify-between w-full group transition-all duration-200 hover:scale-[1.01] p-2 -m-2 rounded-xl"
+                style={{
+                  background: filtersExpanded ? "oklch(0.488 0.243 264.376 / 10%)" : "transparent"
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={16} style={{ color: "oklch(0.809 0.105 251.813)" }} />
+                  <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "oklch(0.809 0.105 251.813)" }}>Filters</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{
+                    background: "oklch(0.488 0.243 264.376 / 20%)",
+                    color: "oklch(0.809 0.105 251.813)"
+                  }}>
+                    {[filters.maxPrice, filters.type, filters.size].filter(Boolean).length} active
+                  </span>
+                  {filtersExpanded ? (
+                    <ChevronUp size={16} style={{ color: "oklch(0.708 0 0)" }} className="transition-transform duration-200" />
+                  ) : (
+                    <ChevronDown size={16} style={{ color: "oklch(0.708 0 0)" }} className="transition-transform duration-200" />
+                  )}
+                </div>
+              </button>
+
+              {/* Filters - Collapsible */}
+              <div
+                className="transition-all duration-300 overflow-hidden"
+                style={{
+                  maxHeight: filtersExpanded ? "500px" : "0px",
+                  opacity: filtersExpanded ? 1 : 0
+                }}
+              >
+              <FieldGroup className="gap-4">
               {/* Max Price */}
               <Field>
-                <FieldLabel className="text-xs font-medium" style={{ color: "oklch(0.708 0 0)" }}>
+                <FieldLabel className="text-xs font-bold flex items-center gap-2 mb-2" style={{ color: "oklch(0.708 0 0)" }}>
+                  <div className="flex h-5 w-5 items-center justify-center rounded-lg" style={{ background: "oklch(0.708 0 0 / 10%)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <line x1="12" y1="1" x2="12" y2="23"/>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                  </div>
                   Max Price (₹/hr)
                 </FieldLabel>
-                <Input
-                  type="number"
-                  name="maxPrice"
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
-                  placeholder="e.g., 50"
-                  className="mt-1.5"
-                  style={{
-                    background: "oklch(1 0 0 / 6%)",
-                    border: "1px solid oklch(1 0 0 / 10%)",
-                    color: "white",
-                  }}
-                />
+                <div className="relative group">
+                  <Input
+                    type="number"
+                    name="maxPrice"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
+                    placeholder="e.g., 50"
+                    className="transition-all duration-300 focus:scale-[1.01] peer"
+                    style={{
+                      background: "linear-gradient(135deg, oklch(1 0 0 / 8%), oklch(1 0 0 / 6%))",
+                      border: "2px solid oklch(1 0 0 / 10%)",
+                      color: "white",
+                      padding: "10px 14px",
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)",
+                      borderRadius: "10px"
+                    }}
+                  />
+                  <div className="absolute inset-0 rounded-xl opacity-0 peer-focus:opacity-100 transition-opacity pointer-events-none" style={{
+                    boxShadow: "0 0 0 3px oklch(0.809 0.105 251.813 / 20%)"
+                  }} />
+                </div>
               </Field>
 
               {/* Type */}
               <Field>
-                <FieldLabel className="text-xs font-medium" style={{ color: "oklch(0.708 0 0)" }}>
+                <FieldLabel className="text-xs font-bold flex items-center gap-2 mb-2" style={{ color: "oklch(0.708 0 0)" }}>
+                  <div className="flex h-5 w-5 items-center justify-center rounded-lg" style={{ background: "oklch(0.708 0 0 / 10%)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
                   Parking Type
                 </FieldLabel>
                 <Select
@@ -211,11 +286,15 @@ export default function MapView() {
                   onValueChange={(v) => setFilters(p => ({ ...p, type: v === "all" ? "" : String(v || "") }))}
                 >
                   <SelectTrigger
-                    className="mt-1.5"
+                    className="transition-all duration-300 hover:scale-[1.01]"
                     style={{
-                      background: "oklch(1 0 0 / 6%)",
-                      border: "1px solid oklch(1 0 0 / 10%)",
+                      background: "linear-gradient(135deg, oklch(1 0 0 / 8%), oklch(1 0 0 / 6%))",
+                      border: "2px solid oklch(1 0 0 / 10%)",
                       color: "white",
+                      padding: "10px 14px",
+                      height: "44px",
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)",
+                      borderRadius: "10px"
                     }}
                   >
                     <SelectValue placeholder="All Types" />
@@ -231,7 +310,14 @@ export default function MapView() {
 
               {/* Size */}
               <Field>
-                <FieldLabel className="text-xs font-medium" style={{ color: "oklch(0.708 0 0)" }}>
+                <FieldLabel className="text-xs font-bold flex items-center gap-2 mb-2" style={{ color: "oklch(0.708 0 0)" }}>
+                  <div className="flex h-5 w-5 items-center justify-center rounded-lg" style={{ background: "oklch(0.708 0 0 / 10%)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                    </svg>
+                  </div>
                   Spot Size
                 </FieldLabel>
                 <Select
@@ -239,11 +325,15 @@ export default function MapView() {
                   onValueChange={(v) => setFilters(p => ({ ...p, size: v === "all" ? "" : String(v || "") }))}
                 >
                   <SelectTrigger
-                    className="mt-1.5"
+                    className="transition-all duration-300 hover:scale-[1.01]"
                     style={{
-                      background: "oklch(1 0 0 / 6%)",
-                      border: "1px solid oklch(1 0 0 / 10%)",
+                      background: "linear-gradient(135deg, oklch(1 0 0 / 8%), oklch(1 0 0 / 6%))",
+                      border: "2px solid oklch(1 0 0 / 10%)",
                       color: "white",
+                      padding: "10px 14px",
+                      height: "44px",
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)",
+                      borderRadius: "10px"
                     }}
                   >
                     <SelectValue placeholder="All Sizes" />
@@ -260,59 +350,108 @@ export default function MapView() {
               <Button
                 onClick={fetchSpots}
                 disabled={spotsLoading}
-                className="w-full font-semibold mt-1"
+                className="w-full font-bold mt-2 transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50"
                 style={{
-                  background: "oklch(0.87 0 0)",
+                  background: "linear-gradient(135deg, oklch(0.87 0 0), oklch(0.809 0.105 251.813))",
                   color: "oklch(0.145 0 0)",
-                  height: "40px",
+                  height: "48px",
+                  boxShadow: "0 4px 20px rgba(200, 200, 200, 0.3)",
+                  borderRadius: "12px"
                 }}
               >
                 {spotsLoading ? (
                   <span className="flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin" /> Searching…
+                    <Loader2 size={16} className="animate-spin" /> Searching…
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <SlidersHorizontal size={14} /> Apply Filters
+                    <SlidersHorizontal size={16} /> Apply Filters
                   </span>
                 )}
               </Button>
             </FieldGroup>
+            </div>
+            </div>
           </div>
 
           {/* Spots list */}
-          <div
-            className="flex-1 overflow-y-auto p-4 space-y-3"
-            style={{ background: "oklch(0.13 0 0 / 80%)" }}
-          >
-            <div className="flex items-center justify-between mb-2 px-1">
-              <p className="text-sm font-semibold text-white">
-                Available Spots
-                <span
-                  className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full"
-                  style={{ background: "oklch(0.488 0.243 264.376 / 15%)", color: "oklch(0.809 0.105 251.813)" }}
-                >
-                  {spots.length}
-                </span>
-              </p>
-              {spotsLoading && <Loader2 size={14} className="animate-spin" style={{ color: "oklch(0.623 0.214 259.815)" }} />}
+          <div className="flex-1 flex flex-col overflow-hidden" style={{ 
+            background: "linear-gradient(180deg, oklch(0.13 0 0 / 85%) 0%, oklch(0.13 0 0 / 75%) 100%)",
+            minHeight: 0,
+            height: 0,
+            pointerEvents: "auto"
+          }}>
+            {/* Header - Fixed */}
+            <div className="shrink-0 p-4 pb-3" style={{
+              background: "oklch(0.13 0 0 / 95%)",
+              backdropFilter: "blur(10px)",
+              borderBottom: "2px solid oklch(1 0 0 / 8%)",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)"
+            }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{
+                    background: "oklch(0.488 0.243 264.376 / 15%)"
+                  }}>
+                    <MapPin size={14} style={{ color: "oklch(0.809 0.105 251.813)" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      Available Spots
+                    </p>
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded-full inline-block"
+                      style={{ background: "oklch(0.488 0.243 264.376 / 20%)", color: "oklch(0.809 0.105 251.813)" }}
+                    >
+                      {spots.length} found
+                    </span>
+                  </div>
+                </div>
+                {spotsLoading && <Loader2 size={16} className="animate-spin" style={{ color: "oklch(0.623 0.214 259.815)" }} />}
+              </div>
             </div>
+            
+            {/* Scrollable content area */}
+            <div 
+              className="flex-1 p-4 space-y-3 custom-scrollbar"
+              style={{
+                height: 0,
+                scrollbarWidth: "thin",
+                scrollbarColor: "oklch(0.623 0.214 259.815 / 50%) transparent",
+                WebkitOverflowScrolling: "touch",
+                pointerEvents: "auto",
+                touchAction: "pan-y",
+                overflowY: "scroll",
+                overscrollBehavior: "contain",
+                willChange: "scroll-position"
+              }}
+            >
 
             {/* Empty state */}
             {!spotsLoading && spots.length === 0 && (
               <div
-                className="rounded-xl p-8 flex flex-col items-center text-center gap-3"
-                style={{ background: "oklch(1 0 0 / 3%)", border: "1px solid oklch(1 0 0 / 7%)" }}
+                className="rounded-2xl p-10 flex flex-col items-center text-center gap-4 animate-fade-in"
+                style={{ 
+                  background: "linear-gradient(135deg, oklch(1 0 0 / 5%), oklch(1 0 0 / 2%))",
+                  border: "2px solid oklch(1 0 0 / 8%)",
+                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)"
+                }}
               >
                 <div
-                  className="flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: "oklch(0.488 0.243 264.376 / 12%)" }}
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl relative"
+                  style={{ 
+                    background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 20%), oklch(0.623 0.214 259.815 / 10%))",
+                    boxShadow: "0 8px 20px rgba(74, 158, 173, 0.2)"
+                  }}
                 >
-                  <MapPin size={22} style={{ color: "oklch(0.623 0.214 259.815)" }} />
+                  <MapPin size={28} style={{ color: "oklch(0.623 0.214 259.815)" }} className="animate-bounce" />
+                  <div className="absolute inset-0 rounded-2xl" style={{
+                    background: "linear-gradient(135deg, transparent, oklch(1 0 0 / 5%))"
+                  }} />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-semibold">No spots found</p>
-                  <p className="text-xs mt-1" style={{ color: "oklch(0.556 0 0)" }}>Try adjusting your filters</p>
+                  <p className="text-white text-base font-bold mb-1">No spots found</p>
+                  <p className="text-xs" style={{ color: "oklch(0.556 0 0)" }}>Try adjusting your filters or search in a different area</p>
                 </div>
               </div>
             )}
@@ -322,30 +461,43 @@ export default function MapView() {
               <div
                 key={spot._id}
                 onClick={() => setSelectedSpot(spot)}
-                className="cursor-pointer transition-transform hover:scale-[1.01]"
+                className="cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
+                style={{
+                  animationDelay: `${index * 50}ms`
+                }}
               >
                 <div
-                  className="rounded-2xl p-px"
+                  className="rounded-2xl p-[2px] transition-all duration-300"
                   style={{
-                    background: selectedSpot?._id === spot._id
-                      ? "linear-gradient(135deg, oklch(0.623 0.214 259.815 / 60%), oklch(0.488 0.243 264.376 / 20%))"
-                      : "linear-gradient(135deg, oklch(1 0 0 / 8%), oklch(1 0 0 / 3%))",
+                    backgroundImage: selectedSpot?._id === spot._id
+                      ? "linear-gradient(135deg, oklch(0.623 0.214 259.815), oklch(0.488 0.243 264.376 / 50%))"
+                      : "linear-gradient(135deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 5%))",
+                    backgroundSize: "200% 200%",
                   }}
                 >
                   <div
-                    className="rounded-2xl"
+                    className="rounded-2xl relative overflow-hidden"
                     style={{
                       background: selectedSpot?._id === spot._id
-                        ? "oklch(0.488 0.243 264.376 / 10%)"
-                        : "oklch(0.145 0 0 / 90%)",
-                      backdropFilter: "blur(12px)",
+                        ? "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 15%), oklch(0.623 0.214 259.815 / 8%))"
+                        : "linear-gradient(180deg, oklch(0.145 0 0 / 95%) 0%, oklch(0.145 0 0 / 92%) 100%)",
+                      backdropFilter: "blur(20px)",
+                      boxShadow: selectedSpot?._id === spot._id
+                        ? "0 8px 30px rgba(74, 158, 173, 0.4), inset 0 1px 0 0 oklch(1 0 0 / 10%)"
+                        : "0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 oklch(1 0 0 / 5%)"
                     }}
                   >
+                    {selectedSpot?._id === spot._id && (
+                      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+                        background: "radial-gradient(circle at top right, oklch(0.623 0.214 259.815), transparent 70%)"
+                      }} />
+                    )}
                     <SpotCard spot={spot} isNearest={index === 0} onClick={() => setSelectedSpot(spot)} />
                   </div>
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </div>

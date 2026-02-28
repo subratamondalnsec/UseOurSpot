@@ -191,7 +191,7 @@ export default function MapComponent({
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-[#050509] to-[#0a0d14]">
+      <div className="flex items-center justify-center h-full bg-gradient-to-br from-[#050509] to-[#0a0d14]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#4A9EAD] mb-4"></div>
           <p className="text-white text-lg font-semibold">Getting your location...</p>
@@ -204,7 +204,7 @@ export default function MapComponent({
   // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-[#050509] to-[#0a0d14]">
+      <div className="flex items-center justify-center h-full bg-gradient-to-br from-[#050509] to-[#0a0d14]">
         <div className="text-center p-8 bg-red-500/10 border border-red-500/20 rounded-2xl max-w-md">
           <h2 className="text-red-400 text-xl font-bold mb-2">Error</h2>
           <p className="text-gray-300">{error}</p>
@@ -219,7 +219,7 @@ export default function MapComponent({
   }
 
   return (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-full">
       <MapContainer
         center={[driverLocation.lat, driverLocation.lng]}
         zoom={14}

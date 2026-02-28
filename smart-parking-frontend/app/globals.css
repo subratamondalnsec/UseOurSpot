@@ -191,3 +191,50 @@
   }
 }
 
+/* Fade In Animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: oklch(1 0 0 / 3%);
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, oklch(0.623 0.214 259.815 / 60%), oklch(0.488 0.243 264.376 / 40%));
+  border-radius: 10px;
+  border: 2px solid oklch(0.13 0 0 / 80%);
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, oklch(0.623 0.214 259.815 / 80%), oklch(0.488 0.243 264.376 / 60%));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, oklch(0.809 0.105 251.813), oklch(0.623 0.214 259.815));
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.623 0.214 259.815 / 60%) oklch(1 0 0 / 3%);
+}
