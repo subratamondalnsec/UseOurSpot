@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import SmoothScrollProvider from "@/components/landing/SmoothScrollProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 

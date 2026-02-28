@@ -23,7 +23,7 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  role: z.enum(["user", "owner"], {
+  role: z.enum(["driver", "owner"], {
     message: "Please select a role.",
   }),
 })
@@ -32,8 +32,8 @@ type FormValues = z.infer<typeof formSchema>
 
 const roles = [
   {
-    value: "user",
-    label: "User",
+    value: "driver",
+    label: "Driver",
     description: "Browse and book spaces",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

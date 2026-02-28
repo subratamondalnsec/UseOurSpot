@@ -28,6 +28,7 @@ export interface ParkingSpot {
   distance?: number;
   averageRating?: number;
   isAvailable: boolean;
+  isApproved?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
