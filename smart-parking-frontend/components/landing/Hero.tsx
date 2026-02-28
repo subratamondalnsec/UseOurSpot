@@ -10,6 +10,7 @@ import { FlipWords } from "./FlipWords";
 interface PricePinData {
   id: number;
   label: string;
+  name: string;
   x: string;
   y: string;
   appearAt: number;
@@ -18,14 +19,14 @@ interface PricePinData {
 
 
 const pricePins: PricePinData[] = [
-  { id: 1, label: "₹45/hr", x: "28%", y: "68%", appearAt: 0.15, fadeAt: 0.55 },
-  { id: 2, label: "₹62/hr", x: "72%", y: "42%", appearAt: 0.55, fadeAt: 0.85 },
-  { id: 3, label: "₹38/hr", x: "38%", y: "32%", appearAt: 0.28, fadeAt: 0.60 },
-  { id: 4, label: "₹80/hr", x: "68%", y: "18%", appearAt: 0.65, fadeAt: 0.95 },
-  { id: 5, label: "₹50/hr", x: "15%", y: "50%", appearAt: 0.10, fadeAt: 0.40 },
-  { id: 6, label: "₹75/hr", x: "82%", y: "75%", appearAt: 0.45, fadeAt: 0.80 },
-  { id: 7, label: "₹40/hr", x: "45%", y: "85%", appearAt: 0.20, fadeAt: 0.50 },
-  { id: 8, label: "₹90/hr", x: "10%", y: "25%", appearAt: 0.75, fadeAt: 0.98 },
+  { id: 1, name: "City Center Garage", label: "₹45/hr", x: "28%", y: "68%", appearAt: 0.15, fadeAt: 0.55 },
+  { id: 2, name: "Central Park Lot", label: "₹62/hr", x: "72%", y: "42%", appearAt: 0.55, fadeAt: 0.85 },
+  { id: 3, name: "Downtown Valet", label: "₹38/hr", x: "38%", y: "32%", appearAt: 0.28, fadeAt: 0.60 },
+  { id: 4, name: "Station Premium", label: "₹80/hr", x: "68%", y: "18%", appearAt: 0.65, fadeAt: 0.95 },
+  { id: 5, name: "Metro Hub Lot", label: "₹50/hr", x: "15%", y: "50%", appearAt: 0.10, fadeAt: 0.40 },
+  { id: 6, name: "Market Complex", label: "₹75/hr", x: "82%", y: "75%", appearAt: 0.45, fadeAt: 0.80 },
+  { id: 7, name: "Arena Parking", label: "₹40/hr", x: "45%", y: "85%", appearAt: 0.20, fadeAt: 0.50 },
+  { id: 8, name: "Business District", label: "₹90/hr", x: "10%", y: "25%", appearAt: 0.75, fadeAt: 0.98 },
 ];
 
 
@@ -71,9 +72,9 @@ function PricePin({
       >
         {pin.id}.
       </div>
-      {/* Price label pill */}
+      {/* Price label pill with details */}
       <div
-        className="text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap"
+        className="text-white text-xs font-semibold px-3.5 py-2 rounded-xl whitespace-nowrap flex flex-col gap-1"
         style={{
           background: "rgba(10, 13, 20, 0.88)",
           backdropFilter: "blur(8px)",
@@ -81,7 +82,12 @@ function PricePin({
           boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
         }}
       >
-        {pin.label}
+        <span className="text-[10px] text-[#4A9EAD] font-bold uppercase tracking-wider leading-none">
+          {pin.name}
+        </span>
+        <span className="text-white font-medium leading-none">
+          {pin.label}
+        </span>
       </div>
     </motion.div>
   );
