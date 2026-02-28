@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
+const LocationPicker = dynamic(() => import('@/components/DriverSerchingSpot/LocationPicker'), {
   ssr: false,
   loading: () => (
     <div className="h-[400px] rounded-xl flex items-center justify-center"
