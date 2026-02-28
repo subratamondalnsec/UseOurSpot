@@ -23,7 +23,7 @@ export default function FeaturesSection() {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
-      className="max-w-[1400px] mx-auto px-6 lg:px-12 py-28"
+      className="max-w-[1400px] mx-auto px-6 "
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* LEFT: Phone Mockup */}
