@@ -61,30 +61,6 @@ export default function FeaturesSection() {
             We made a feature that can certainly solve your parking problems so far.
           </p>
 
-          {/* Feature Cards */}
-          <div className="grid grid-cols-3 gap-4 w-full mb-10">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`rounded-2xl p-5 flex flex-col items-center text-center gap-3 border transition-all cursor-pointer ${
-                  f.active
-                    ? "bg-[#4A9EAD] border-[#4A9EAD] text-white shadow-[0_8px_30px_rgba(74,158,173,0.35)]"
-                    : "bg-[#08090f] border-white/5 text-[#5a6370] hover:border-[#4A9EAD]/30 hover:bg-[#0a0d14]"
-                }`}
-              >
-                <f.icon className="w-6 h-6" />
-                <span className="text-xs font-medium leading-snug">{f.title}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <button className="border border-[#4A9EAD]/30 rounded-full px-8 py-3 text-sm text-[#4A9EAD] hover:bg-[#4A9EAD] hover:text-black font-medium transition-all duration-300">
-            Learn More
-          </button>
         </div>
       </div>
     </motion.section>
