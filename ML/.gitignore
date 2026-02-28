@@ -1,0 +1,78 @@
+# =========================
+# Node.js (Backend)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Python / ML
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.pt
+*.onnx
+*.h5
+*.joblib
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# ML Model Folders
+saved_models/
+runs/
+weights/
+models/
+
+# =========================
+# Kaggle / Colab Outputs
+# =========================
+output/
+outputs/
+logs/
+checkpoints/
+
+# =========================
+# Dataset Files
+# =========================
+data/
+datasets/
+*.csv
+*.json
+*.zip
+
+# =========================
+# IDE Files
+# =========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Build / Production
+# =========================
+dist/
+build/
+
+# =========================
+# Logs
+# =========================
+*.log
