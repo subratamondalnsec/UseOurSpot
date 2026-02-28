@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { IconCheck } from "@tabler/icons-react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue, useSpring, useMotionValueEvent, useMotionValue } from "framer-motion";
 import Image from "next/image";
 
 /* ─────────────────── Price-pin data ─────────────────── */
@@ -112,18 +112,47 @@ export default function HeroSection() {
 
   /* ── Car position ── */
   // Phase 1 (0 → 0.45): car drives south → y 15% → 55%, x stays 50%
-  // Phase 2 (0.45 → 1):  car drives east  → x 50% → 82%, y stays 55%
-  const carX = useTransform(scrollYProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
-  const carY = useTransform(scrollYProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
+  // Phase 2 (0.45 → 1):  car drives east (right) → x 50% → 82%, y stays 55%
+  const carXRaw = useTransform(scrollYProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
+  const carYRaw = useTransform(scrollYProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
+
+  // Smooth out the position transitions
+  const carX = useSpring(carXRaw, { stiffness: 50, damping: 20 });
+  const carY = useSpring(carYRaw, { stiffness: 50, damping: 20 });
 
   /* ── Car rotation ── */
   // 180° = nose south, 90° = nose east
   // Smooth turn at scroll 0.40 → 0.50
-  const carRotation = useTransform(
-    scrollYProgress,
-    [0, 0.01, 0.40, 0.50, 1.0],
-    [180, 180, 180, 90, 90]
-  );
+  const dynamicRotation = useMotionValue(180);
+  const carRotation = useSpring(dynamicRotation, { stiffness: 60, damping: 15 });
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const previous = scrollYProgress.getPrevious() ?? 0;
+    const diff = latest - previous;
+
+    // Ignore tiny scroll jitters or zero movement to prevent twitching
+    if (Math.abs(diff) < 0.001) return;
+
+    const isScrollingUp = diff < 0;
+
+    // Reset to facing down at the very top
+    if (latest <= 0.01) {
+      dynamicRotation.set(180);
+      return;
+    }
+
+    if (latest < 0.45) {
+      // Phase 1 (vertical movement)
+      // When scrolling down: faces South (180)
+      // When scrolling up: faces North, but uses 360 instead of 0 so it turns right (clockwise) from 270
+      dynamicRotation.set(isScrollingUp ? 360 : 180);
+    } else {
+      // Phase 2 (horizontal movement)
+      // When going down: faces East (90)
+      // When going back up: faces West (270). 90 -> 270 is a clockwise (right) turn.
+      dynamicRotation.set(isScrollingUp ? 270 : 90);
+    }
+  });
 
   /* ── Blue beam ── */
   const beamLength = useTransform(scrollYProgress, [0, 0.3], [60, 200]);
@@ -135,8 +164,17 @@ export default function HeroSection() {
   /* ── Route dash offset (drawn path) ── */
   const routeDrawProgress = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
+  /* ── Smooth Scrolling for the section wrapper ── */
+  useEffect(() => {
+    // Lenis smooth scroll implementation for frictionless scroll
+    (async () => {
+      const LocomotiveScroll = (await import("locomotive-scroll")).default;
+      const locomotiveScroll = new LocomotiveScroll();
+    })();
+  }, []);
+
   return (
-    <section ref={sectionRef} className="relative min-h-[300vh]">
+    <section ref={sectionRef} className="relative min-h-[300vh] scroll-smooth">
       {/* ───── Sticky wrapper — pinned for full scroll ───── */}
       <div className="sticky top-0 h-screen flex overflow-hidden" style={{ background: "#050509" }}>
         {/* Ambient glow orbs */}
@@ -260,7 +298,7 @@ export default function HeroSection() {
                 <stop offset="100%" stopColor="#4A9EAD" stopOpacity="0.15" />
               </linearGradient>
             </defs>
-            {/* Route line: south then east */}
+            {/* Route line: south then east (right) */}
             <motion.path
               d="M 50 15 L 50 55 L 82 55"
               fill="none"
