@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
-import SpotCard from '@/components/SpotCard';
+import SpotCard from '@/components/DriverSerchingSpot/SpotCard';
 import { Navigation, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
 import { ParkingSpot, Location, ParkingFilters } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const MapComponent = dynamic(() => import('@/components/MapComponent'), {
+const MapComponent = dynamic(() => import('@/components/DriverSerchingSpot/MapComponent'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-full" style={{ background: "#050509" }}>
