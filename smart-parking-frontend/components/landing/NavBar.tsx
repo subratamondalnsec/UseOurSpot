@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 const links = [
   { label: "How it works", href: "#how-it-works" },
@@ -15,6 +16,7 @@ const links = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -57,9 +59,46 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <button className="hidden sm:block text-sm border border-[#4A9EAD]/40 rounded-full px-6 py-2.5 text-[#4A9EAD] hover:bg-[#4A9EAD] hover:text-black font-medium transition-all duration-300 shadow-[0_0_20px_rgba(74,158,173,0.1)]">
-          Start free trial
-        </button>
+        <div className="hidden lg:flex items-center gap-6">
+          {!isLoading && (
+            isAuthenticated ? (
+              /* ── Logged-in: show Profile button ── */
+              <Link href="/profile">
+                <Button
+                  className="flex items-center gap-2 px-5 rounded-full font-semibold transition-all duration-200"
+                  style={{
+                    background: "rgba(74,158,173,0.15)",
+                    border: "1px solid rgba(74,158,173,0.4)",
+                    color: "#4A9EAD",
+                  }}
+                >
+                  <span
+                    className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white"
+                    style={{ background: "#4A9EAD" }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase() ?? "U"}
+                  </span>
+                  {user?.name?.split(" ")[0] ?? "Profile"}
+                </Button>
+              </Link>
+            ) : (
+              /* ── Logged-out: show Sign in + Sign up ── */
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm text-[#5a6370] hover:text-white transition-colors duration-200"
+                >
+                  Sign in
+                </Link>
+                <Link href="/signup">
+                  <Button className="bg-[#4A9EAD] hover:bg-[#3d8390] text-white px-6 rounded-full transition-colors duration-200">
+                    Sign up
+                  </Button>
+                </Link>
+              </>
+            )
+          )}
+        </div>
       </div>
     </motion.header>
   );

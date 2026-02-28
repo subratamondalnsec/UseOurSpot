@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['driver', 'owner', 'admin'], default: 'driver' },
     phone: { type: String },
     avatar: { type: String },
-    isVerified: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: true },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

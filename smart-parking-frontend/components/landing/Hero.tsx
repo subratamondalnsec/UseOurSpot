@@ -5,6 +5,7 @@ import { IconCheck } from "@tabler/icons-react";
 import { motion, useScroll, useTransform, MotionValue, useSpring, useMotionValueEvent, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import { FlipWords } from "./FlipWords";
+import Link from "next/link";
 
 /* ─────────────────── Price-pin data ─────────────────── */
 interface PricePinData {
@@ -117,19 +118,12 @@ export default function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  // Apply a single spring to the overall scroll progress to guarantee perfect path adherence 
-  // and prevent corner-cutting when scrolling super fast
+
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
-  /* ── Car position ── */
-  // Phase 1 (0 → 0.45): car drives south → y 15% → 55%, x stays 50%
-  // Phase 2 (0.45 → 1):  car drives east (right) → x 50% → 82%, y stays 55%
   const carX = useTransform(smoothProgress, [0, 0.45, 1.0], ["50%", "50%", "82%"]);
   const carY = useTransform(smoothProgress, [0, 0.45, 1.0], ["15%", "55%", "55%"]);
 
-  /* ── Car rotation ── */
-  // 180° = nose south, 90° = nose east
-  // Smooth turn at scroll 0.40 → 0.50
   const dynamicRotation = useMotionValue(180);
   const carRotation = useSpring(dynamicRotation, { stiffness: 60, damping: 15 });
 
@@ -149,14 +143,10 @@ export default function HeroSection() {
     }
 
     if (latest < 0.45) {
-      // Phase 1 (vertical movement)
-      // When scrolling down: faces South (180)
-      // When scrolling up: faces North, but uses 360 instead of 0 so it turns right (clockwise) from 270
+
       dynamicRotation.set(isScrollingUp ? 360 : 180);
     } else {
-      // Phase 2 (horizontal movement)
-      // When going down: faces East (90)
-      // When going back up: faces West (270). 90 -> 270 is a clockwise (right) turn.
+
       dynamicRotation.set(isScrollingUp ? 270 : 90);
     }
   });
@@ -250,14 +240,12 @@ export default function HeroSection() {
             animate="visible"
             className="flex w-full max-w-md gap-3"
           >
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-1 bg-[#0a0d14] rounded-full px-6 py-4 border border-white/8 text-white placeholder:text-[#3a4050] text-sm outline-none focus:border-[#4A9EAD]/40 transition-colors shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]"
-            />
-            <button className="bg-[#4A9EAD] text-white rounded-full px-8 py-4 font-semibold text-sm hover:brightness-110 transition-all whitespace-nowrap shadow-[0_4px_20px_rgba(74,158,173,0.35),0_0_60px_rgba(74,158,173,0.15)] cursor-pointer">
-              Get Access
-            </button>
+            <Link
+              href="/signup"
+              className="bg-[#4A9EAD] text-white px-10 py-4 rounded-full font-bold text-sm  transition-transform shadow-[0_0_25px_rgba(74,158,173,0.4)]"
+            >
+              Get Started
+            </Link>
           </motion.div>
 
           {/* Trust badges */}
