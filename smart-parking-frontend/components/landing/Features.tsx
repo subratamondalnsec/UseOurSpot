@@ -38,7 +38,7 @@ export default function FeaturesSection() {
             {/* Glow behind phone */}
             <div className="absolute -inset-10 bg-[#4A9EAD]/8 rounded-full blur-[80px]" />
             <Image
-              src="/images/phone-mockup.png"
+              src="/images/mockup.png"
               alt="DIGIPARK phone app mockup"
               fill
               className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative z-10"
