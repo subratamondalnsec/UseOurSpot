@@ -58,6 +58,7 @@ const bookingRoutes      = require('./routes/bookingRoutes');
 const ownerRoutes        = require('./routes/ownerRoutes');
 const driverRoutes       = require('./routes/driverRoutes');
 const adminRoutes        = require('./routes/adminRoutes');
+const paymentRoutes      = require('./routes/paymentRoutes');
 // const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use('/api/auth',          authRoutes);
@@ -65,6 +66,7 @@ app.use('/api/booking',       bookingRoutes);
 app.use('/api/owner',         ownerRoutes);
 app.use('/api/driver',        driverRoutes);
 app.use('/api/admin',         adminRoutes);
+app.use('/api/payment',       paymentRoutes);
 // app.use('/api/notifications', notificationRoutes);
 
 // ─── Health Check ────────────────────────────────────────────

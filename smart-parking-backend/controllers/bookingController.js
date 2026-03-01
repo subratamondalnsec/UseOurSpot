@@ -9,65 +9,64 @@ exports.createBooking = async (req, res) => {
   try {
     const { spotId, startTime, endTime, carLocation } = req.body;
 
-    // Find spot and check availability
+    // Find spot
     const spot = await ParkingSpot.findById(spotId);
-    if (!spot || spot.status === 'occupied') {
-      return res.status(400).json({ success: false, message: 'Spot not available' });
+    if (!spot) {
+      return res.status(404).json({ success: false, message: 'Spot not found' });
+    }
+    if (spot.status === 'occupied') {
+      return res.status(400).json({ success: false, message: 'Spot is already occupied' });
     }
 
     // Calculate base amount using dynamic pricing
-    const hours        = (new Date(endTime) - new Date(startTime)) / 3600000;
-    const dynamicPrice = await calculateDynamicPrice(spot.pricePerHour, spotId);
-    const baseAmount   = hours * dynamicPrice;
-
-    // Create booking
-    const booking = await Booking.create({
-      driverId:      req.user._id,
-      spotId,
-      startTime:     new Date(startTime),
-      endTime:       new Date(endTime),
-      carLocation,
-      baseAmount,
-      finalAmount:   baseAmount,
-      paymentStatus: 'paid',
-      status:        'active',
-    });
-
-    // Generate QR code as data URL
-    const qrDataURL = await qrcode.toDataURL(booking._id.toString());
-    booking.qrCode  = qrDataURL;
-    await booking.save();
-
-    // Mark spot as occupied
-    spot.status = 'occupied';
-    await spot.save();
-
-    // Send booking confirmation email
-    try {
-      const driver = req.user;
-      await sendEmail({
-        to:      driver.email,
-        subject: 'Booking Confirmed — Smart Parking',
-        html: `
-          <h2>Booking Confirmed! 🚗</h2>
-          <p>Hi ${driver.name},</p>
-          <p>Your parking spot has been booked successfully.</p>
-          <ul>
-            <li><strong>Spot:</strong> ${spot.address}</li>
-            <li><strong>From:</strong> ${new Date(startTime).toLocaleString()}</li>
-            <li><strong>To:</strong> ${new Date(endTime).toLocaleString()}</li>
-            <li><strong>Amount Paid:</strong> ₹${baseAmount.toFixed(2)}</li>
-          </ul>
-          <p>Your QR code is attached to your booking. Show it at the spot.</p>
-        `,
-      });
-    } catch (emailErr) {
-      console.error('Booking confirmation email failed:', emailErr.message);
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const hours = (end.getTime() - start.getTime()) / 3600000;
+    
+    if (hours <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid time range' });
     }
 
-    res.status(201).json({ success: true, booking });
+    const dynamicPrice = await calculateDynamicPrice(spot.pricePerHour, spotId);
+    const baseAmount = Math.ceil(hours * dynamicPrice);
+
+    // Create booking (DO NOT change spot status - only after payment verified)
+    const booking = await Booking.create({
+      driverId: req.user._id,
+      spotId,
+      startTime: start,
+      endTime: end,
+      baseAmount,
+      carLocation,
+      paymentStatus: 'pending',
+      status: 'active'
+    });
+
+    res.status(201).json({
+      success: true,
+      bookingId: booking._id,
+      baseAmount
+    });
   } catch (error) {
     console.error('createBooking error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ─── @route  GET /api/booking/:id ───────────────────────────
+exports.getBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('spotId', 'address photos pricePerHour coordinates type rules')
+      .populate('driverId', 'name email phone');
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    res.json({ success: true, booking });
+  } catch (error) {
+    console.error('getBooking error:', error.message);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -100,57 +99,66 @@ exports.endSession = async (req, res) => {
   try {
     const { bookingId } = req.body;
 
-    const booking = await Booking.findById(bookingId);
+    const booking = await Booking.findById(bookingId)
+      .populate('spotId')
+      .populate('driverId');
+    
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
-
-    const spot          = await ParkingSpot.findById(booking.spotId);
-    const actualEndTime = new Date();
-    booking.actualEndTime = actualEndTime;
-
-    // Calculate overstay charge if ended late
-    let overstayCharge = 0;
-    if (actualEndTime > new Date(booking.endTime)) {
-      const extraMs     = actualEndTime - new Date(booking.endTime);
-      const extraHours  = extraMs / 3600000;
-      overstayCharge    = extraHours * spot.pricePerHour;
+    if (booking.status !== 'active') {
+      return res.status(400).json({ success: false, message: 'Session already ended' });
     }
 
-    booking.overstayCharge = overstayCharge;
-    booking.finalAmount    = (booking.baseAmount || 0) + overstayCharge;
-    booking.status         = 'completed';
+    const now = new Date();
+    const spot = booking.spotId;
+    const driver = booking.driverId;
 
-    // Free up the spot
+    // Check overstay
+    if (now > new Date(booking.endTime)) {
+      const extraMs = now.getTime() - new Date(booking.endTime).getTime();
+      const extraHours = extraMs / 3600000;
+      booking.overstayCharge = Math.ceil(extraHours * spot.pricePerHour);
+    } else {
+      booking.overstayCharge = 0;
+    }
+
+    booking.finalAmount = booking.baseAmount + booking.overstayCharge;
+    booking.status = 'completed';
+    booking.actualEndTime = now;
     spot.status = 'free';
-    await spot.save();
+
     await booking.save();
+    await spot.save();
 
     // Send receipt email
     try {
-      const driver = await require('../models/User').findById(booking.driverId).select('name email');
-      if (driver) {
-        await sendEmail({
-          to:      driver.email,
-          subject: 'Parking Session Receipt — Smart Parking',
-          html: `
-            <h2>Session Complete 🏁</h2>
-            <p>Hi ${driver.name}, here is your parking receipt.</p>
-            <ul>
-              <li><strong>Spot:</strong> ${spot.address}</li>
-              <li><strong>Base Amount:</strong> ₹${(booking.baseAmount || 0).toFixed(2)}</li>
-              <li><strong>Overstay Charge:</strong> ₹${overstayCharge.toFixed(2)}</li>
-              <li><strong>Total Paid:</strong> ₹${booking.finalAmount.toFixed(2)}</li>
-            </ul>
-            <p>Thank you for using Smart Parking!</p>
-          `,
-        });
-      }
+      await sendEmail({
+        to: driver.email,
+        subject: '🧾 Parking Receipt — SmartPark',
+        html: `
+          <div style="font-family:sans-serif;max-width:500px">
+            <h2>Parking Receipt</h2>
+            <p>Location: ${spot.address}</p>
+            <p>Start: ${new Date(booking.startTime).toLocaleString()}</p>
+            <p>End: ${now.toLocaleString()}</p>
+            <hr/>
+            <p>Base Amount: ₹${booking.baseAmount}</p>
+            <p>Overstay Charge: ₹${booking.overstayCharge}</p>
+            <h3>Total: ₹${booking.finalAmount}</h3>
+          </div>
+        `
+      });
     } catch (emailErr) {
       console.error('Receipt email failed:', emailErr.message);
     }
 
-    res.json({ success: true, booking });
+    res.json({ 
+      success: true, 
+      booking,
+      overstayCharge: booking.overstayCharge,
+      finalAmount: booking.finalAmount
+    });
   } catch (error) {
     console.error('endSession error:', error.message);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -161,7 +169,7 @@ exports.endSession = async (req, res) => {
 exports.myBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ driverId: req.user._id })
-      .populate('spotId', 'address photos pricePerHour')
+      .populate('spotId', 'address photos pricePerHour type')
       .sort({ createdAt: -1 });
 
     res.json({ success: true, bookings });
@@ -181,12 +189,11 @@ exports.extendTime = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Active booking not found' });
     }
 
-    const spot        = await ParkingSpot.findById(booking.spotId);
-    const extraCharge = (extraMinutes / 60) * spot.pricePerHour;
+    const spot = await ParkingSpot.findById(booking.spotId);
+    const extraCharge = Math.ceil((extraMinutes / 60) * spot.pricePerHour);
 
-    booking.baseAmount = (booking.baseAmount || 0) + extraCharge;
-    booking.finalAmount = booking.baseAmount + (booking.overstayCharge || 0);
-    booking.endTime    = new Date(new Date(booking.endTime).getTime() + extraMinutes * 60000);
+    booking.baseAmount += extraCharge;
+    booking.endTime = new Date(booking.endTime.getTime() + extraMinutes * 60000);
 
     await booking.save();
     res.json({ success: true, booking });
@@ -203,12 +210,15 @@ exports.rateSpot = async (req, res) => {
 
     // Verify the booking belongs to this user and is completed
     const booking = await Booking.findOne({
-      _id:      bookingId,
+      _id: bookingId,
       driverId: req.user._id,
-      status:   'completed',
+      status: 'completed'
     });
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Completed booking not found' });
+    }
+    if (booking.status !== 'completed') {
+      return res.status(400).json({ success: false, message: 'Booking must be completed to rate' });
     }
 
     const spot = await ParkingSpot.findById(booking.spotId);
@@ -221,10 +231,10 @@ exports.rateSpot = async (req, res) => {
 
     // Recalculate average
     const total = spot.ratings.reduce((sum, r) => sum + r.rating, 0);
-    spot.averageRating = total / spot.ratings.length;
+    spot.averageRating = Number((total / spot.ratings.length).toFixed(1));
 
     await spot.save();
-    res.json({ success: true, averageRating: spot.averageRating });
+    res.json({ success: true, message: 'Rating submitted successfully' });
   } catch (error) {
     console.error('rateSpot error:', error.message);
     res.status(500).json({ success: false, message: 'Server error' });
