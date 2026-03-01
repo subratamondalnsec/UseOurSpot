@@ -4,6 +4,7 @@ const router  = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const {
   createBooking,
+  getBooking,
   scanQR,
   endSession,
   myBookings,
@@ -16,9 +17,10 @@ const {
 router.use(protect);
 
 router.post('/create',                 createBooking);
+router.get('/my-bookings',             myBookings);
+router.get('/:id',                     getBooking);
 router.post('/scan-qr',                scanQR);
 router.post('/end-session',            endSession);
-router.get('/my-bookings',             myBookings);
 router.post('/extend',                 extendTime);
 router.post('/rate',                   rateSpot);
 router.get('/find-my-car/:bookingId',  findMyCar);
