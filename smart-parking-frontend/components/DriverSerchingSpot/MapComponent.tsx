@@ -235,7 +235,7 @@ export default function MapComponent({
         {routeData && routeData.geometry && (
           <GeoJSON
             key={JSON.stringify(routeData.geometry)}
-            data={routeData.geometry}
+            data={routeData.geometry as any}
             style={{ color: '#3b82f6', weight: 5, opacity: 0.8 }}
           />
         )}
