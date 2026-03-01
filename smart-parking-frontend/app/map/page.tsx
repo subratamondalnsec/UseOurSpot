@@ -126,18 +126,30 @@ export default function MapView() {
     if (!driverLocation) return;
     setSpotsLoading(true);
     try {
-      const params: any = { lat: driverLocation.lat, lng: driverLocation.lng };
-      if (filters.maxPrice) params.maxPrice = filters.maxPrice;
-      if (filters.type) params.type = filters.type;
-      if (filters.size) params.size = filters.size;
+      const payload = {
+        userLat: driverLocation.lat,
+        userLng: driverLocation.lng,
+        budget: filters.maxPrice ? Number(filters.maxPrice) : 200, // Default generous budget
+        preferredSize: filters.size || "medium",
+        preferredType: filters.type || "open"
+      };
 
-      const response = await axios.get<{ success: boolean; spots: ParkingSpot[] }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/driver/search`,
-        { params }
+      const flaskServer = process.env.NEXT_PUBLIC_FLASK_SERVER || "http://127.0.0.1:5001";
+      
+      const response = await axios.post<ParkingSpot[]>(
+        `${flaskServer}/recommend`,
+        payload
       );
-      if (response.data.success) setSpots(response.data.spots);
+      console.log(response)
+      
+      if (Array.isArray(response.data)) {
+        setSpots(response.data);
+      } else {
+        setSpots([]);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch ML recommendations:", err);
+      setSpots([]);
     } finally {
       setSpotsLoading(false);
     }

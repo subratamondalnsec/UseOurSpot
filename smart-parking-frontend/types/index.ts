@@ -29,6 +29,9 @@ export interface ParkingSpot {
   averageRating?: number;
   isAvailable: boolean;
   isApproved?: boolean;
+  score?: number;
+  rank?: number;
+  label?: string;
   createdAt?: string;
   updatedAt?: string;
 }
