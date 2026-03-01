@@ -127,7 +127,7 @@ exports.getEarnings = async (req, res) => {
     // Find all bookings for those spots
     const bookings = await Booking.find({ spotId: { $in: spotIds } });
 
-    const totalEarnings = bookings.reduce((sum, b) => sum + (b.finalAmount || 0), 0);
+    const totalEarnings = bookings.reduce((sum, b) => sum + (b.finalAmount || b.baseAmount || 0), 0);
 
     res.json({
       success: true,
@@ -219,10 +219,19 @@ exports.getDashboardStats = async (req, res) => {
     const activeBookings = bookings.filter((b) => b.status === 'active').length;
     const completedBookings = bookings.filter((b) => b.status === 'completed').length;
     
-    const totalEarnings = bookings.reduce((sum, b) => sum + (b.finalAmount || 0), 0);
+    const totalEarnings = bookings.reduce((sum, b) => sum + (b.finalAmount || b.baseAmount || 0), 0);
     const pendingEarnings = bookings
       .filter((b) => b.status === 'active')
       .reduce((sum, b) => sum + (b.baseAmount || 0), 0);
+
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const thisMonthEarnings = bookings
+      .filter((b) => {
+        const d = new Date(b.createdAt);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
+      .reduce((sum, b) => sum + (b.finalAmount || b.baseAmount || 0), 0);
 
     res.json({
       success: true,
@@ -235,6 +244,7 @@ exports.getDashboardStats = async (req, res) => {
         completedBookings,
         totalEarnings,
         pendingEarnings,
+        thisMonthEarnings,
       },
     });
   } catch (error) {

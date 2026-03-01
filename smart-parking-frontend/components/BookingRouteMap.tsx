@@ -89,21 +89,10 @@ export default function BookingRouteMap({
     ? Math.ceil(routeData.duration / 60)
     : '—';
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-75">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'oklch(0.623 0.214 259.815)' }} />
-          <p className="text-sm" style={{ color: 'oklch(0.556 0 0)' }}>Loading route...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       {/* Map */}
-      <div className="h-100 rounded-xl overflow-hidden border-2" 
+      <div className="h-100 rounded-xl overflow-hidden border-2 relative" 
         style={{ borderColor: 'oklch(1 0 0 / 12%)' }}>
         <MapContainer
           center={[centerLat, centerLng]}
@@ -145,69 +134,77 @@ export default function BookingRouteMap({
             <GeoJSON
               data={routeData.geometry}
               style={{
-                color: '#10b981',
-                weight: 4,
-                opacity: 0.8,
+                color: '#3b82f6',
+                weight: 5,
+                opacity: 0.9,
               }}
             />
           )}
         </MapContainer>
+        {loading && (
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3 bg-white p-4 rounded-xl shadow-lg border border-gray-100">
+              <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+              <p className="text-sm font-medium text-gray-700">Finding best route...</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Route Info */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl p-4 flex items-center gap-3"
-          style={{ background: 'oklch(1 0 0 / 4%)', border: '1px solid oklch(1 0 0 / 8%)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0"
-            style={{ background: '#10b98118', color: '#10b981' }}>
+        <div className="rounded-xl p-4 flex items-center gap-3 bg-gray-50 border border-gray-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-blue-100 text-blue-600">
             <Navigation size={20} />
           </div>
-          <div>
-            <p className="text-xs" style={{ color: 'oklch(0.556 0 0)' }}>Distance</p>
-            <p className="text-white font-bold text-lg">{distance} km</p>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-gray-500">Distance</p>
+            {loading ? (
+              <div className="h-6 mt-1 w-16 bg-gray-200 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-black font-bold text-lg">{distance} km</p>
+            )}
           </div>
         </div>
 
-        <div className="rounded-xl p-4 flex items-center gap-3"
-          style={{ background: 'oklch(1 0 0 / 4%)', border: '1px solid oklch(1 0 0 / 8%)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0"
-            style={{ background: 'oklch(0.623 0.214 259.815 / 18%)', color: 'oklch(0.809 0.105 251.813)' }}>
+        <div className="rounded-xl p-4 flex items-center gap-3 bg-gray-50 border border-gray-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-indigo-100 text-indigo-600">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div>
-            <p className="text-xs" style={{ color: 'oklch(0.556 0 0)' }}>Drive Time</p>
-            <p className="text-white font-bold text-lg">~{duration} min</p>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-gray-500">Drive Time</p>
+            {loading ? (
+              <div className="h-6 mt-1 w-16 bg-gray-200 animate-pulse rounded"></div>
+            ) : (
+              <p className="text-black font-bold text-lg">~{duration} min</p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Location Details */}
       <div className="space-y-2">
-        <div className="flex items-start gap-3 p-3 rounded-lg"
-          style={{ background: 'oklch(1 0 0 / 4%)' }}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 mt-0.5"
-            style={{ background: '#ef444418', color: '#ef4444' }}>
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 mt-0.5 bg-red-100 text-red-600">
             🚗
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold" style={{ color: 'oklch(0.708 0 0)' }}>Car Parked At</p>
-            <p className="text-white text-sm mt-0.5">
+            <p className="text-xs font-semibold text-gray-500">Car Parked At</p>
+            <p className="text-black font-medium text-sm mt-0.5">
               {carLocation.lat.toFixed(6)}, {carLocation.lng.toFixed(6)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-start gap-3 p-3 rounded-lg"
-          style={{ background: 'oklch(1 0 0 / 4%)' }}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 mt-0.5"
-            style={{ background: 'oklch(0.488 0.243 264.376 / 18%)', color: 'oklch(0.809 0.105 251.813)' }}>
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 mt-0.5 bg-emerald-100 text-emerald-600">
             <MapPin size={16} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold" style={{ color: 'oklch(0.708 0 0)' }}>Parking Spot</p>
-            <p className="text-white text-sm mt-0.5 line-clamp-2">{spotAddress}</p>
+            <p className="text-xs font-semibold text-gray-500">Parking Spot</p>
+            <p className="text-black font-medium text-sm mt-0.5 line-clamp-2">{spotAddress}</p>
           </div>
         </div>
       </div>

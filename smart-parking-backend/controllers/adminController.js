@@ -75,10 +75,10 @@ exports.getDashboardStats = async (req, res) => {
     const [userCount, spotCount, bookings] = await Promise.all([
       User.countDocuments(),
       ParkingSpot.countDocuments(),
-      Booking.find().select('finalAmount'),
+      Booking.find().select('finalAmount baseAmount'),
     ]);
 
-    const totalRevenue  = bookings.reduce((sum, b) => sum + (b.finalAmount || 0), 0);
+    const totalRevenue  = bookings.reduce((sum, b) => sum + (b.finalAmount || b.baseAmount || 0), 0);
     const bookingCount  = bookings.length;
 
     res.json({

@@ -219,7 +219,7 @@ export default function ProfilePage() {
   const isDriver = user.role === "driver";
 
   // Driver computed stats
-  const totalSpent = bookings.reduce((s, b) => s + (b.finalAmount || 0), 0);
+  const totalSpent = bookings.reduce((s, b) => s + (b.finalAmount || b.baseAmount || 0), 0);
   const activeBooking = bookings.find((b) => b.status === "active");
   const completedTrips = bookings.filter((b) => b.status === "completed").length;
 
@@ -798,7 +798,7 @@ export default function ProfilePage() {
         <Dialog open={showRouteMap} onOpenChange={setShowRouteMap}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-black">
                 <Map className="w-5 h-5 text-emerald-500" />
                 Parking Spot Location
               </DialogTitle>

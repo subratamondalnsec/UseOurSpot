@@ -36,15 +36,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setToken(storedToken);
         try {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setUser(JSON.parse(storedUser));
         } catch (e) {
-            console.error("Failed to parse user from localStorage");
+            console.error("Failed to parse user from localStorage", e);
         }
         axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(false);
   }, []);
 

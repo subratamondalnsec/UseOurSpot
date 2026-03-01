@@ -2,6 +2,7 @@
 export const getDriverIcon = () => {
   if (globalThis.window === undefined) return null;
   
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const L = require('leaflet');
   return L.divIcon({
     className: 'driver-marker',
@@ -15,6 +16,7 @@ export const getDriverIcon = () => {
 export const getNearestSpotIcon = () => {
   if (globalThis.window === undefined) return null;
   
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const L = require('leaflet');
   return L.divIcon({
     className: 'nearest-spot-marker',
@@ -28,6 +30,7 @@ export const getNearestSpotIcon = () => {
 export const getSpotIcon = () => {
   if (globalThis.window === undefined) return null;
   
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const L = require('leaflet');
   return L.divIcon({
     className: 'spot-marker',
@@ -41,6 +44,7 @@ export const getSpotIcon = () => {
 export const getCarIcon = () => {
   if (globalThis.window === undefined) return null;
   
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const L = require('leaflet');
   return L.divIcon({
     className: 'car-marker',
