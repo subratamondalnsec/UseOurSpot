@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import SpotCard from '@/components/DriverSerchingSpot/SpotCard';
 import { Navigation, SlidersHorizontal, MapPin, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ParkingSpot, Location, ParkingFilters } from '@/types';
@@ -85,6 +86,7 @@ function FullScreenState({
 
 // ════════════════════════ PAGE ════════════════════════════════
 export default function MapView() {
+  const router = useRouter();
   const [filters, setFilters] = useState<ParkingFilters>({ maxPrice: '', type: '', size: '' });
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [driverLocation, setDriverLocation] = useState<Location | null>(null);
@@ -633,7 +635,7 @@ export default function MapView() {
                       height: "42px",
                       boxShadow: "0 4px 20px rgba(200, 200, 200, 0.3)"
                     }}
-                    onClick={() => alert(`Booking ${selectedSpot.address || selectedSpot.title}`)}
+                    onClick={() => router.push(`/booking/${selectedSpot._id}`)}
                   >
                     Book This Spot
                   </Button>
