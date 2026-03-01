@@ -595,6 +595,13 @@ export default function MyBookingsPage() {
           <div className="p-5 overflow-y-auto">
             {selectedBooking?.carLocation && (() => {
               const spot = selectedBooking.spotId as ParkingSpot;
+              if (!spot?.location?.coordinates) {
+                return (
+                  <div className="flex items-center justify-center py-10">
+                    <p className="text-sm text-white/50">Route information is unavailable for this spot.</p>
+                  </div>
+                );
+              }
               const spotLocation = { lat: spot.location.coordinates[1], lng: spot.location.coordinates[0] };
               return <BookingRouteMap carLocation={selectedBooking.carLocation} spotLocation={spotLocation} spotAddress={spot.address} />;
             })()}

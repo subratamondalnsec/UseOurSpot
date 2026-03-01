@@ -89,7 +89,7 @@ export default function ExtendTimeModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md text-slate-900">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-emerald-500" />
@@ -99,7 +99,7 @@ export default function ExtendTimeModal({
 
           <div className="space-y-4">
             {/* Current End Time */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm ">
               <Clock className="w-4 h-4" />
               <span>
                 Current end: {new Date(currentEndTime).toLocaleString('en-IN', {
@@ -125,7 +125,7 @@ export default function ExtendTimeModal({
                     className={
                       extraMinutes === min
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                        : ''
+                        : 'text-slate-900'
                     }
                   >
                     +{min} min
@@ -139,18 +139,18 @@ export default function ExtendTimeModal({
             {/* Summary */}
             <div className="bg-muted rounded-lg p-3 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">New end time:</span>
+                <span className="">New end time:</span>
                 <span className="font-medium">{newEndTime}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Extra charge:</span>
+                <span className="text-sm">Extra charge:</span>
                 <span className="text-xl font-bold text-emerald-600">₹{extraCharge}</span>
               </div>
             </div>
           </div>
 
           <DialogFooter className="flex gap-2 sm:gap-2">
-            <Button onClick={onClose} variant="outline" disabled={loading}>
+            <Button onClick={onClose} variant="outline" disabled={loading} className="text-slate-900">
               Cancel
             </Button>
             <Button

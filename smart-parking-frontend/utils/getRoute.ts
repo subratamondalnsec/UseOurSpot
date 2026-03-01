@@ -19,7 +19,11 @@ export async function getRoute(
   try {
     const url = `https://router.project-osrm.org/route/v1/${mode}/${driverLng},${driverLat};${spotLng},${spotLat}?geometries=geojson&overview=full`;
 
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
     const data = await response.json();
 
     if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
