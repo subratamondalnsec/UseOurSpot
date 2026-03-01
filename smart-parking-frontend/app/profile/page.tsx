@@ -7,6 +7,15 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Map, Home, Calendar, PlusCircle, MapPin, User, LogOut, Menu, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import BookingRouteMap from "@/components/BookingRouteMap";
 
 // ── Types ─────────────────────────────────────────────────────
 interface Spot {
@@ -35,6 +44,10 @@ interface Booking {
     address: string;
     photos?: string[];
     pricePerHour: number;
+    location: {
+      type: string;
+      coordinates: [number, number];
+    };
   };
   startTime: string;
   endTime: string;
@@ -44,6 +57,7 @@ interface Booking {
   baseAmount?: number;
   overstayCharge?: number;
   finalAmount?: number;
+  carLocation?: { lat: number; lng: number };
   createdAt: string;
 }
 
@@ -120,6 +134,12 @@ export default function ProfilePage() {
   // Driver state
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  
+  // Sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("overview");
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push("/login");
@@ -212,7 +232,150 @@ export default function ProfilePage() {
       <div className="pointer-events-none fixed -bottom-40 -right-40 h-[400px] w-[400px] rounded-full opacity-10 blur-[100px]"
         style={{ background: "oklch(0.623 0.214 259.815)" }} />
 
-      <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 py-12 space-y-6">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed top-6 left-4 z-50 w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: "oklch(0.145 0 0 / 95%)", border: "1px solid oklch(1 0 0 / 12%)" }}
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+
+        {/* Layout Grid */}
+        <div className="flex gap-6">
+          
+          {/* Sidebar */}
+          <aside className={`
+            fixed lg:sticky top-0 left-0 h-screen lg:h-auto
+            w-64 lg:w-72 shrink-0
+            transition-transform duration-300 z-40
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}>
+            <div className="h-full lg:h-auto pt-20 lg:pt-0 pb-6 px-4 lg:px-0">
+              <div className="rounded-2xl p-px h-full"
+                style={{ background: "linear-gradient(135deg, oklch(1 0 0 / 12%), oklch(1 0 0 / 4%))" }}>
+                <div className="rounded-2xl p-4 h-full"
+                  style={{ background: "oklch(0.145 0 0 / 95%)", backdropFilter: "blur(20px)" }}>
+                  
+                  {/* Profile Section */}
+                  <div className="mb-6 pb-6 border-b" style={{ borderColor: "oklch(1 0 0 / 8%)" }}>
+                    <div className="w-16 h-16 rounded-xl flex items-center justify-center text-xl font-black mb-3"
+                      style={{
+                        background: isDriver
+                          ? "linear-gradient(135deg, #7c3aed, #a78bfa)"
+                          : "linear-gradient(135deg, oklch(0.488 0.243 264.376), oklch(0.546 0.245 262.881))",
+                      }}>
+                      {initials(user.name)}
+                    </div>
+                    <h3 className="font-bold text-white text-sm truncate">{user.name}</h3>
+                    <p className="text-xs mt-1 truncate" style={{ color: "oklch(0.556 0 0)" }}>{user.email}</p>
+                    <div className="mt-2">
+                      {isOwner && <LabelBadge label="Owner" color="oklch(0.623 0.214 259.815)" />}
+                      {isDriver && <LabelBadge label="Driver" color="#a78bfa" />}
+                    </div>
+                  </div>
+
+                  {/* Navigation */}
+                  <nav className="space-y-1">
+                    <button
+                      onClick={() => { setActiveSection("overview"); setSidebarOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeSection === "overview" ? "text-white" : "text-gray-400 hover:text-white"
+                      }`}
+                      style={activeSection === "overview" ? {
+                        background: "linear-gradient(135deg, #a78bfa18, #a78bfa08)",
+                        border: "1px solid #a78bfa30"
+                      } : {}}>
+                      <Home size={18} />
+                      <span>Overview</span>
+                    </button>
+
+                    {isDriver && (
+                      <>
+                        <button
+                          onClick={() => { setActiveSection("bookings"); setSidebarOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                            activeSection === "bookings" ? "text-white" : "text-gray-400 hover:text-white"
+                          }`}
+                          style={activeSection === "bookings" ? {
+                            background: "linear-gradient(135deg, #a78bfa18, #a78bfa08)",
+                            border: "1px solid #a78bfa30"
+                          } : {}}>
+                          <Calendar size={18} />
+                          <span>My Bookings</span>
+                        </button>
+                        <Link href="/map" onClick={() => setSidebarOpen(false)}>
+                          <div className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                            <MapPin size={18} />
+                            <span>Find Parking</span>
+                          </div>
+                        </Link>
+                      </>
+                    )}
+
+                    {isOwner && (
+                      <>
+                        <button
+                          onClick={() => { setActiveSection("spots"); setSidebarOpen(false); }}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                            activeSection === "spots" ? "text-white" : "text-gray-400 hover:text-white"
+                          }`}
+                          style={activeSection === "spots" ? {
+                            background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 18%), oklch(0.488 0.243 264.376 / 8%))",
+                            border: "1px solid oklch(0.623 0.214 259.815 / 30%)"
+                          } : {}}>
+                          <MapPin size={18} />
+                          <span>My Spots</span>
+                        </button>
+                        <Link href="/owner/add-spot" onClick={() => setSidebarOpen(false)}>
+                          <div className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                            <PlusCircle size={18} />
+                            <span>Add New Spot</span>
+                          </div>
+                        </Link>
+                      </>
+                    )}
+
+                    <button
+                      onClick={() => { setActiveSection("account"); setSidebarOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeSection === "account" ? "text-white" : "text-gray-400 hover:text-white"
+                      }`}
+                      style={activeSection === "account" ? {
+                        background: "linear-gradient(135deg, #22c55e18, #22c55e08)",
+                        border: "1px solid #22c55e30"
+                      } : {}}>
+                      <User size={18} />
+                      <span>Account</span>
+                    </button>
+                  </nav>
+
+                  {/* Logout Button */}
+                  <div className="mt-6 pt-6 border-t" style={{ borderColor: "oklch(1 0 0 / 8%)" }}>
+                    <button
+                      onClick={() => { logout(); setSidebarOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 transition-colors">
+                      <LogOut size={18} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Overlay for mobile */}
+          {sidebarOpen && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black/50 z-30"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0 space-y-6">
 
         {/* ── Profile Header ──────────────────────────────────── */}
         <div className="rounded-2xl p-px"
@@ -440,7 +603,7 @@ export default function ProfilePage() {
             )}
 
             {/* Quick links grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Link href="/map">
                 <div className="rounded-2xl p-px cursor-pointer transition-transform hover:scale-[1.01]"
                   style={{ background: "linear-gradient(135deg, #a78bfa30, #a78bfa08)" }}>
@@ -452,7 +615,7 @@ export default function ProfilePage() {
                         <polygon points="3 11 22 2 13 21 11 13 3 11"/>
                       </svg>
                     </div>
-                    <p className="text-white font-bold">Find Parking Near Me</p>
+                    <p className="text-white font-bold">Find Parking</p>
                     <p className="text-xs mt-1" style={{ color: "oklch(0.556 0 0)" }}>
                       Browse available spots on the live map.
                     </p>
@@ -460,12 +623,31 @@ export default function ProfilePage() {
                 </div>
               </Link>
 
+              <Link href="/my-bookings">
+                <div className="rounded-2xl p-px cursor-pointer transition-transform hover:scale-[1.01]"
+                  style={{ background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 30%), oklch(0.488 0.243 264.376 / 8%))" }}>
+                  <div className="rounded-2xl p-6 h-full"
+                    style={{ background: "oklch(0.145 0 0 / 92%)", backdropFilter: "blur(20px)" }}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-4"
+                      style={{ background: "oklch(0.488 0.243 264.376 / 18%)", color: "oklch(0.809 0.105 251.813)" }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
+                    </div>
+                    <p className="text-white font-bold">My Bookings</p>
+                    <p className="text-xs mt-1" style={{ color: "oklch(0.556 0 0)" }}>
+                      View and manage all your bookings.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
               <div className="rounded-2xl p-px"
-                style={{ background: "linear-gradient(135deg, oklch(0.488 0.243 264.376 / 20%), oklch(0.488 0.243 264.376 / 5%))" }}>
+                style={{ background: "linear-gradient(135deg, #22c55e30, #22c55e08)" }}>
                 <div className="rounded-2xl p-6 h-full"
                   style={{ background: "oklch(0.145 0 0 / 92%)", backdropFilter: "blur(20px)" }}>
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-4"
-                    style={{ background: "oklch(0.488 0.243 264.376 / 15%)", color: "oklch(0.809 0.105 251.813)" }}>
+                    style={{ background: "#22c55e18", color: "#22c55e" }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                     </svg>
@@ -491,12 +673,20 @@ export default function ProfilePage() {
                       {bookings.length} booking{bookings.length !== 1 ? "s" : ""} total
                     </p>
                   </div>
-                  <Link href="/map">
-                    <Button variant="ghost" className="rounded-full text-xs px-4 font-semibold"
-                      style={{ background: "#a78bfa12", border: "1px solid #a78bfa30", color: "#a78bfa", height: "34px" }}>
-                      + Book a spot
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href="/my-bookings">
+                      <Button variant="ghost" className="rounded-full text-xs px-4 font-semibold"
+                        style={{ background: "oklch(0.488 0.243 264.376 / 12%)", border: "1px solid oklch(0.623 0.214 259.815 / 30%)", color: "oklch(0.809 0.105 251.813)", height: "34px" }}>
+                        View All
+                      </Button>
+                    </Link>
+                    <Link href="/map">
+                      <Button variant="ghost" className="rounded-full text-xs px-4 font-semibold"
+                        style={{ background: "#a78bfa12", border: "1px solid #a78bfa30", color: "#a78bfa", height: "34px" }}>
+                        + Book a spot
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
 
                 {loadingBookings && (
@@ -578,6 +768,22 @@ export default function ProfilePage() {
                               <span>Total: <span className="text-white font-semibold">₹{booking.finalAmount.toFixed(2)}</span></span>
                             )}
                           </div>
+
+                          {/* View Route Button */}
+                          <div className="mt-2">
+                            <Button
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setShowRouteMap(true);
+                              }}
+                              variant="ghost"
+                              className="rounded-full text-xs px-4 py-1.5 h-auto font-semibold"
+                              style={{ background: "#10b98112", border: "1px solid #10b98130", color: "#10b981" }}
+                            >
+                              <Map className="w-3.5 h-3.5 mr-1.5" />
+                              View Route
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -587,6 +793,57 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Route Map Modal */}
+        <Dialog open={showRouteMap} onOpenChange={setShowRouteMap}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Map className="w-5 h-5 text-emerald-500" />
+                Parking Spot Location
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedBooking && (() => {
+              const spot = selectedBooking.spotId;
+              
+              // Check if location data exists, use fallback if not
+              const hasLocation = spot?.location?.coordinates?.length === 2;
+              
+              // Default to Kolkata coordinates if no spot location
+              const spotLocation = hasLocation ? {
+                lat: spot.location.coordinates[1],
+                lng: spot.location.coordinates[0]
+              } : {
+                lat: 22.5726,
+                lng: 88.3639
+              };
+              
+              // Use car location if available, otherwise use a point 500m away from spot
+              const carLocation = selectedBooking.carLocation || {
+                lat: spotLocation.lat + 0.005,
+                lng: spotLocation.lng + 0.005
+              };
+              
+              return (
+                <BookingRouteMap
+                  carLocation={carLocation}
+                  spotLocation={spotLocation}
+                  spotAddress={spot?.address || "Parking Spot"}
+                />
+              );
+            })()}
+
+            <DialogFooter>
+              <Button onClick={() => setShowRouteMap(false)} variant="outline">
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+          </main>
+        </div>
       </div>
     </div>
   );
