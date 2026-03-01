@@ -5,6 +5,7 @@ ultralytics
 opencv-python-headless
 easyocr
 Flask
+flask-cors
 pymongo
 scikit-learn
 python-dotenv
