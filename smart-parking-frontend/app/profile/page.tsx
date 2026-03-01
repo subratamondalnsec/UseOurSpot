@@ -7,7 +7,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Map, Home, Calendar, PlusCircle, MapPin, User, LogOut, Menu, X } from "lucide-react";
+import { Map as MapIcon, Home, Calendar, PlusCircle, MapPin, User, LogOut, Menu, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -778,7 +778,7 @@ export default function ProfilePage() {
                               className="rounded-full text-xs px-4 py-1.5 h-auto font-semibold"
                               style={{ background: "#10b98112", border: "1px solid #10b98130", color: "#10b981" }}
                             >
-                              <Map className="w-3.5 h-3.5 mr-1.5" />
+                              <MapIcon className="w-3.5 h-3.5 mr-1.5" />
                               View Route
                             </Button>
                           </div>
@@ -797,7 +797,7 @@ export default function ProfilePage() {
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-black">
-                <Map className="w-5 h-5 text-emerald-500" />
+                <MapIcon className="w-5 h-5 text-emerald-500" />
                 Parking Spot Location
               </DialogTitle>
             </DialogHeader>
