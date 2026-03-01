@@ -57,7 +57,7 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-2.5">
-            {isNearest && (
+            {(spot.label || isNearest) && (
               <span
                 className="text-[10px] font-black px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide flex items-center gap-1.5 animate-pulse"
                 style={{
@@ -70,7 +70,7 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
-                Nearest
+                {spot.label || "Nearest"}
               </span>
             )}
             {!isApproved && (

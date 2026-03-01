@@ -106,9 +106,17 @@ def recommend():
             spot_info.append({
                 "_id": str(spot["_id"]),   # MongoDB default ObjectId
                 "address": spot.get("address", ""),
+                "title": spot.get("title", ""),
+                "description": spot.get("description", ""),
                 "pricePerHour": price,
                 "averageRating": rating,
-                "distance_km": round(distance, 2)
+                "type": spot.get("type", "open"),
+                "size": spot.get("size", "medium"),
+                "photos": spot.get("photos", []),
+                "location": spot.get("location", {"type": "Point", "coordinates": [lng, lat]}),
+                "coordinates": spot.get("coordinates", {"lat": lat, "lng": lng}),
+                "distance": round(distance, 2),
+                "isAvailable": spot.get("isAvailable", True)
             })
 
         if not feature_matrix:
@@ -137,7 +145,7 @@ def recommend():
         # Attach score
         for i in range(len(spot_info)):
             # Distance penalty improves realism
-            distance_penalty = spot_info[i]["distance_km"] * 0.02
+            distance_penalty = spot_info[i]["distance"] * 0.02
             final_score = similarities[i] - distance_penalty
             spot_info[i]["score"] = round(float(final_score), 4)
 
