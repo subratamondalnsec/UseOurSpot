@@ -54,3 +54,34 @@ export const paymentAPI = {
     bookingId: string;
   }) => axios.post(`${API_BASE_URL}/payment/verify`, data),
 };
+
+// Owner API
+export const ownerAPI = {
+  getDashboardStats: () =>
+    axios.get(`${API_BASE_URL}/owner/dashboard-stats`),
+
+  mySpots: () =>
+    axios.get(`${API_BASE_URL}/owner/my-spots`),
+
+  getSpot: (id: string) =>
+    axios.get(`${API_BASE_URL}/owner/spot/${id}`),
+
+  addSpot: (data: FormData) =>
+    axios.post(`${API_BASE_URL}/owner/add-spot`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  editSpot: (id: string, data: FormData) =>
+    axios.put(`${API_BASE_URL}/owner/edit-spot/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  deleteSpot: (id: string) =>
+    axios.delete(`${API_BASE_URL}/owner/delete-spot/${id}`),
+
+  earnings: () =>
+    axios.get(`${API_BASE_URL}/owner/earnings`),
+
+  getSpotBookings: (spotId: string) =>
+    axios.get(`${API_BASE_URL}/owner/spot-bookings/${spotId}`),
+};

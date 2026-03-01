@@ -164,3 +164,81 @@ exports.getSpotStatus = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// ─── @route  GET /api/owner/spot/:id ────────────────────────
+exports.getSpotById = async (req, res) => {
+  try {
+    const spot = await ParkingSpot.findOne({ _id: req.params.id, ownerId: req.user._id });
+    if (!spot) {
+      return res.status(404).json({ success: false, message: 'Spot not found' });
+    }
+    res.json({ success: true, spot });
+  } catch (error) {
+    console.error('getSpotById error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ─── @route  GET /api/owner/spot-bookings/:spotId ───────────
+exports.getSpotBookings = async (req, res) => {
+  try {
+    // Verify the spot belongs to this owner
+    const spot = await ParkingSpot.findOne({ _id: req.params.spotId, ownerId: req.user._id });
+    if (!spot) {
+      return res.status(404).json({ success: false, message: 'Spot not found' });
+    }
+
+    // Get all bookings for this spot
+    const bookings = await Booking.find({ spotId: req.params.spotId })
+      .populate('userId', 'name email phone')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, bookings });
+  } catch (error) {
+    console.error('getSpotBookings error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ─── @route  GET /api/owner/dashboard-stats ─────────────────
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // Get all spots belonging to this owner
+    const spots = await ParkingSpot.find({ ownerId: req.user._id });
+    const spotIds = spots.map((s) => s._id);
+
+    // Get all bookings for those spots
+    const bookings = await Booking.find({ spotId: { $in: spotIds } });
+
+    // Calculate statistics
+    const totalSpots = spots.length;
+    const activeSpots = spots.filter((s) => s.status === 'free').length;
+    const occupiedSpots = spots.filter((s) => s.status === 'occupied').length;
+    
+    const totalBookings = bookings.length;
+    const activeBookings = bookings.filter((b) => b.status === 'active').length;
+    const completedBookings = bookings.filter((b) => b.status === 'completed').length;
+    
+    const totalEarnings = bookings.reduce((sum, b) => sum + (b.finalAmount || 0), 0);
+    const pendingEarnings = bookings
+      .filter((b) => b.status === 'active')
+      .reduce((sum, b) => sum + (b.baseAmount || 0), 0);
+
+    res.json({
+      success: true,
+      stats: {
+        totalSpots,
+        activeSpots,
+        occupiedSpots,
+        totalBookings,
+        activeBookings,
+        completedBookings,
+        totalEarnings,
+        pendingEarnings,
+      },
+    });
+  } catch (error) {
+    console.error('getDashboardStats error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
