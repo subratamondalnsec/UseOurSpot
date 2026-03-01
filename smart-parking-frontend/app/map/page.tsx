@@ -95,7 +95,7 @@ export default function MapView() {
   const [spotsLoading, setSpotsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -427,20 +427,11 @@ export default function MapView() {
             
             {/* Scrollable content area */}
             <div 
-              className="flex-1 px-4 py-5 custom-scrollbar"
+              className="flex-1 overflow-y-auto px-4 py-5 custom-scrollbar flex flex-col gap-4"
               style={{
-                height: 0,
                 scrollbarWidth: "thin",
                 scrollbarColor: "oklch(0.623 0.214 259.815 / 50%) transparent",
                 WebkitOverflowScrolling: "touch",
-                pointerEvents: "auto",
-                touchAction: "pan-y",
-                overflowY: "scroll",
-                overscrollBehavior: "contain",
-                willChange: "scroll-position",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px"
               }}
             >
 
@@ -535,7 +526,7 @@ export default function MapView() {
         </div>
       </div>
 
-      {/* ── Map area ─────────────────────────────────────────── */}
+
       <div className="flex-1 relative h-full">
 
         {/* Toggle sidebar button */}

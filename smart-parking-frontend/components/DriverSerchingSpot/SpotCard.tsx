@@ -149,7 +149,7 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
               boxShadow: `0 3px 12px ${sizeColor[spot.size]}25`
             }}
           >
-            {sizeLabel[spot.size]}
+            {sizeLabel[spot.size] }
           </span>
 
           {/* Distance */}
@@ -170,56 +170,10 @@ export default function SpotCard({ spot, isNearest, onClick }: SpotCardProps) {
           )}
         </div>
 
-        {/* Status dot */}
-        <div className="flex items-center gap-2.5 flex-shrink-0 px-3.5 py-2 rounded-xl" style={{
-          background: isFree ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
-          border: `2px solid ${isFree ? "rgba(34, 197, 94, 0.35)" : "rgba(239, 68, 68, 0.35)"}`,
-          boxShadow: `0 3px 12px ${isFree ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)"}`
-        }}>
-          <span
-            className="h-2 w-2 rounded-full flex-shrink-0 animate-pulse"
-            style={{
-              background: isFree ? "#22c55e" : "#ef4444",
-              boxShadow: `0 0 8px ${isFree ? "#22c55e" : "#ef4444"}`,
-            }}
-          />
-          <span
-            className="text-[11px] font-bold uppercase tracking-wide"
-            style={{ color: isFree ? "#22c55e" : "#ef4444" }}
-          >
-            {isFree ? "Free" : "Occupied"}
-          </span>
-        </div>
+      
       </div>
 
-      {/* Rating (if present) */}
-      {spot.averageRating && (
-        <div className="mt-4 pt-4 flex items-center gap-2.5" style={{
-          borderTop: "2px solid oklch(1 0 0 / 8%)"
-        }}>
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <svg
-                key={star}
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill={star <= Math.round(spot.averageRating!) ? "#f59e0b" : "none"}
-                stroke="#f59e0b"
-                strokeWidth="2"
-              >
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            ))}
-          </div>
-          <span className="text-xs font-bold" style={{ color: "#f59e0b" }}>
-            {spot.averageRating.toFixed(1)}
-          </span>
-          <span className="text-[10px] font-medium" style={{ color: "oklch(0.556 0 0)" }}>
-            rating
-          </span>
-        </div>
-      )}
+
       
       {/* Hover indicator */}
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" style={{

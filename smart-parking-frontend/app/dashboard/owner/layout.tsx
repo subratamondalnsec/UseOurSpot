@@ -131,9 +131,9 @@ export default function OwnerDashboardLayout({
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {NAV_ITEMS.map((item) => {
               const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard/owner" &&
-                  pathname.startsWith(item.href));
+                item.href === "/dashboard/owner"
+                  ? pathname === item.href // Exact match for root dashboard
+                  : pathname.startsWith(item.href); // Prefix match for subpages
 
               return (
                 <button
@@ -147,7 +147,7 @@ export default function OwnerDashboardLayout({
                     transition-all duration-200
                     ${
                       isActive
-                        ? "bg-linear-to-r from-emerald-500 to-emerald-600 text-white shadow-md"
+                        ? "bg-emerald-500 text-white shadow-md"
                         : "text-gray-700 hover:bg-gray-100"
                     }
                   `}

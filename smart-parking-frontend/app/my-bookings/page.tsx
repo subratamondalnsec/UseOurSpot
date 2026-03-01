@@ -15,7 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { MapPin, Clock, Star, Car, Loader2, Map, Zap, CheckCircle2, XCircle } from 'lucide-react';
+import { MapPin, Clock, Star, Car, Loader2, Map as MapIcon, Zap, CheckCircle2, XCircle, Home, Calendar, User, LogOut, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { bookingAPI } from '@/utils/api';
 import { toast } from 'react-hot-toast';
@@ -25,8 +25,12 @@ import OverstayModal from '@/components/OverstayModal';
 import BookingRouteMap from '@/components/BookingRouteMap';
 import { Booking, ParkingSpot } from '@/types';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 export default function MyBookingsPage() {
+  const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -101,6 +105,11 @@ export default function MyBookingsPage() {
 
   const formatDateTime = (date: string) =>
     new Date(date).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  function initials(name?: string) {
+    if (!name) return "U";
+    return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  }
 
   const renderBookingCard = (booking: Booking) => {
     const spot = booking.spotId as ParkingSpot;
@@ -316,8 +325,95 @@ export default function MyBookingsPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'transparent' }}>
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#050509", color: "#fff" }}>
+      {/* Ambient blobs */}
+      <div className="pointer-events-none fixed -top-40 -left-40 h-[500px] w-[500px] rounded-full opacity-15 blur-[120px]"
+        style={{ background: "oklch(0.488 0.243 264.376)" }} />
+      <div className="pointer-events-none fixed -bottom-40 -right-40 h-[400px] w-[400px] rounded-full opacity-10 blur-[100px]"
+        style={{ background: "oklch(0.623 0.214 259.815)" }} />
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed top-6 left-4 z-50 w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
+          style={{ background: "oklch(0.145 0 0 / 95%)", border: "1px solid oklch(1 0 0 / 12%)" }}
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+
+        <div className="flex gap-6">
+
+          {/* Sidebar */}
+          <aside className={`
+            fixed lg:sticky top-0 left-0 h-screen
+            w-64 lg:w-72 shrink-0
+            transition-transform duration-300 z-40
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}>
+             <div className="h-full pt-20 lg:pt-12 pb-6 px-4 lg:px-0">
+               <div className="rounded-2xl p-px h-full" style={{ background: "linear-gradient(135deg, oklch(1 0 0 / 12%), oklch(1 0 0 / 4%))" }}>
+                 <div className="rounded-2xl p-4 h-full" style={{ background: "oklch(0.145 0 0 / 95%)", backdropFilter: "blur(20px)" }}>
+                    {/* Profile area */}
+                    <div className="mb-6 pb-6 border-b" style={{ borderColor: "oklch(1 0 0 / 8%)" }}>
+                        <div className="w-16 h-16 rounded-xl flex items-center justify-center text-xl font-black mb-3" style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}>
+                           {user ? initials(user.name) : 'U'}
+                        </div>
+                        <h3 className="font-bold text-white text-sm truncate">{user?.name}</h3>
+                        <p className="text-xs mt-1 truncate" style={{ color: "oklch(0.556 0 0)" }}>{user?.email}</p>
+                        <div className="mt-2">
+                           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "#a78bfa22", color: "#a78bfa" }}>Driver</span>
+                        </div>
+                    </div>
+
+                    <nav className="space-y-1">
+                      <Link href="/profile">
+                        <div className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white`}>
+                          <Home size={18} />
+                          <span>Overview</span>
+                        </div>
+                      </Link>
+
+                      <Link href="/my-bookings" onClick={() => setSidebarOpen(false)}>
+                        <div className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-white`}
+                          style={{
+                            background: "linear-gradient(135deg, #a78bfa18, #a78bfa08)",
+                            border: "1px solid #a78bfa30"
+                          }}>
+                          <Calendar size={18} />
+                          <span>My Bookings</span>
+                        </div>
+                      </Link>
+                      
+                      <Link href="/map" onClick={() => setSidebarOpen(false)}>
+                        <div className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                          <MapPin size={18} />
+                          <span>Find Parking</span>
+                        </div>
+                      </Link>
+
+                      <Link href="/profile">
+                        <div className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-gray-400 hover:text-white`}>
+                          <User size={18} />
+                          <span>Account</span>
+                        </div>
+                      </Link>
+                    </nav>
+
+                    <div className="mt-6 pt-6 border-t" style={{ borderColor: "oklch(1 0 0 / 8%)" }}>
+                      <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 transition-colors">
+                        <LogOut size={18} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                 </div>
+               </div>
+             </div>
+          </aside>
+
+          {sidebarOpen && <div className="lg:hidden fixed inset-0 bg-black/50 z-30" onClick={() => setSidebarOpen(false)} />}
+
+          <main className="flex-1 min-w-0">
+             <div className="max-w-3xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="space-y-1">
@@ -487,7 +583,7 @@ export default function MyBookingsPage() {
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl"
                 style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)' }}>
-                <Map className="w-4 h-4 text-indigo-400" />
+                <MapIcon className="w-4 h-4 text-indigo-400" />
               </div>
               <div>
                 <h3 className="font-semibold text-white text-sm">Booking Route</h3>
@@ -513,6 +609,9 @@ export default function MyBookingsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      </main>
+    </div>
+    </div>
     </div>
   );
 }

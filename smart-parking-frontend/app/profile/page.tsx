@@ -248,12 +248,12 @@ export default function ProfilePage() {
           
           {/* Sidebar */}
           <aside className={`
-            fixed lg:sticky top-0 left-0 h-screen lg:h-auto
+            fixed lg:sticky top-0 left-0 h-screen
             w-64 lg:w-72 shrink-0
             transition-transform duration-300 z-40
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}>
-            <div className="h-full lg:h-auto pt-20 lg:pt-0 pb-6 px-4 lg:px-0">
+            <div className="h-full pt-20 lg:pt-12 pb-6 px-4 lg:px-0">
               <div className="rounded-2xl p-px h-full"
                 style={{ background: "linear-gradient(135deg, oklch(1 0 0 / 12%), oklch(1 0 0 / 4%))" }}>
                 <div className="rounded-2xl p-4 h-full"
@@ -294,18 +294,16 @@ export default function ProfilePage() {
 
                     {isDriver && (
                       <>
-                        <button
-                          onClick={() => { setActiveSection("bookings"); setSidebarOpen(false); }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                            activeSection === "bookings" ? "text-white" : "text-gray-400 hover:text-white"
-                          }`}
-                          style={activeSection === "bookings" ? {
-                            background: "linear-gradient(135deg, #a78bfa18, #a78bfa08)",
-                            border: "1px solid #a78bfa30"
-                          } : {}}>
-                          <Calendar size={18} />
-                          <span>My Bookings</span>
-                        </button>
+                        <Link href="/my-bookings" onClick={() => setSidebarOpen(false)}>
+                          <div className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeSection === "bookings" ? "text-white" : "text-gray-400 hover:text-white"}`}
+                            style={activeSection === "bookings" ? {
+                              background: "linear-gradient(135deg, #a78bfa18, #a78bfa08)",
+                              border: "1px solid #a78bfa30"
+                            } : {}}>
+                            <Calendar size={18} />
+                            <span>My Bookings</span>
+                          </div>
+                        </Link>
                         <Link href="/map" onClick={() => setSidebarOpen(false)}>
                           <div className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors">
                             <MapPin size={18} />
