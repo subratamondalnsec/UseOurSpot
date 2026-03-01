@@ -1,6 +1,6 @@
 // Factory functions to create icons on demand (client-side only)
 export const getDriverIcon = () => {
-  if (typeof window === 'undefined') return null;
+  if (globalThis.window === undefined) return null;
   
   const L = require('leaflet');
   return L.divIcon({
@@ -13,7 +13,7 @@ export const getDriverIcon = () => {
 };
 
 export const getNearestSpotIcon = () => {
-  if (typeof window === 'undefined') return null;
+  if (globalThis.window === undefined) return null;
   
   const L = require('leaflet');
   return L.divIcon({
@@ -26,7 +26,7 @@ export const getNearestSpotIcon = () => {
 };
 
 export const getSpotIcon = () => {
-  if (typeof window === 'undefined') return null;
+  if (globalThis.window === undefined) return null;
   
   const L = require('leaflet');
   return L.divIcon({
@@ -38,7 +38,21 @@ export const getSpotIcon = () => {
   });
 };
 
+export const getCarIcon = () => {
+  if (globalThis.window === undefined) return null;
+  
+  const L = require('leaflet');
+  return L.divIcon({
+    className: 'car-marker',
+    html: '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🚗</div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
+  });
+};
+
 // Legacy exports for backward compatibility
-export const driverIcon = typeof window !== 'undefined' ? getDriverIcon() : null;
-export const nearestSpotIcon = typeof window !== 'undefined' ? getNearestSpotIcon() : null;
-export const spotIcon = typeof window !== 'undefined' ? getSpotIcon() : null;
+export const driverIcon = globalThis.window ? getDriverIcon() : null;
+export const nearestSpotIcon = globalThis.window ? getNearestSpotIcon() : null;
+export const spotIcon = globalThis.window ? getSpotIcon() : null;
+export const carIcon = globalThis.window ? getCarIcon() : null;
