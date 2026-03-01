@@ -19,7 +19,9 @@ const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:5173',
   'http://localhost:5174',
-];
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
 const corsOptions = {
   origin: allowedOrigins,
@@ -77,6 +79,10 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 // ─── 404 Handler ────────────────────────────────────────────

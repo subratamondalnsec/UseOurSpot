@@ -115,7 +115,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Build reset link (raw token — not the hash)
-    const resetLink = `http://localhost:3000/reset-password/${rawToken}`;
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${rawToken}`;
 
     // Send reset link via shared sendEmail utility
     await sendEmail({
