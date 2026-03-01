@@ -63,6 +63,28 @@ exports.searchSpots = async (req, res) => {
   }
 };
 
+// ─── @route  GET /api/driver/spot/:id ───────────────────────
+// @desc    Get single parking spot details
+// @access  Private (driver)
+exports.getSpot = async (req, res) => {
+  try {
+    const spot = await ParkingSpot.findById(req.params.id)
+      .populate('ownerId', 'name email phone');
+
+    if (!spot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Parking spot not found'
+      });
+    }
+
+    res.json({ success: true, spot });
+  } catch (error) {
+    console.error('getSpot error:', error.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 exports.addCarDetails = async (req, res) => {
   try {
     const { licensePlate, color, company, model, year } = req.body;
