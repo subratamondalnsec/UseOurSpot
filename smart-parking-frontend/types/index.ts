@@ -79,3 +79,30 @@ export interface LocationPickerProps {
   onLocationSelect: (coords: Coordinates) => void;
   initialPosition?: [number, number] | null;
 }
+
+// Booking Types
+export interface Booking {
+  _id: string;
+  driverId: string | {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  spotId: string | ParkingSpot;
+  startTime: string;
+  endTime: string;
+  actualEndTime?: string;
+  qrCode?: string;
+  paymentStatus: 'pending' | 'paid';
+  status: 'active' | 'completed' | 'cancelled';
+  baseAmount: number;
+  overstayCharge: number;
+  finalAmount: number;
+  carLocation?: {
+    lat: number;
+    lng: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
