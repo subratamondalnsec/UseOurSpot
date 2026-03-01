@@ -187,8 +187,12 @@ export default function MapSection() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="relative w-[220px] h-[220px]"
           >
-            <Image
+            {/* <Image
               src="/images/car-topdown.png"
+              alt="Car shadow"
+              /> */}
+            <Image
+              src="/images/car-topdown1.png"
               alt="Navigation car"
               fill
               className="object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] filter brightness-110"

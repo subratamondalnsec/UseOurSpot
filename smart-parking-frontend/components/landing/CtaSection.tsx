@@ -55,10 +55,10 @@ export default function CTASection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" as const }}
-          className="relative w-full lg:w-[45%] h-[350px] lg:h-[480px] lg:-mt-16 z-10"
+          className="relative w-full lg:w-[45%] h-[350px] lg:h-[480px]  z-10"
         >
           <Image
-            src="/images/phone-double.png"
+            src="/images/phone-double1.png"
             alt="DIGIPARK app mockups"
             fill
             className="object-contain object-bottom drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
