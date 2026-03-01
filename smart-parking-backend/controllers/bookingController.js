@@ -169,7 +169,7 @@ exports.endSession = async (req, res) => {
 exports.myBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ driverId: req.user._id })
-      .populate('spotId', 'address photos pricePerHour type')
+      .populate('spotId', 'address photos pricePerHour type coordinates')
       .sort({ createdAt: -1 });
 
     res.json({ success: true, bookings });

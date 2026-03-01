@@ -226,7 +226,7 @@ export function SignUpForm() {
                     className="text-xs font-medium"
                     style={{ color: "oklch(0.708 0 0)" }}
                   >
-                    I want to
+                    Who Are You
                   </FieldLabel>
                   <div className="mt-1.5 grid grid-cols-2 gap-3">
                     {roles.map((role) => {

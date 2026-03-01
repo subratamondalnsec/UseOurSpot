@@ -26,6 +26,25 @@ const GeoJSON = dynamic(
   () => import('react-leaflet').then((mod) => mod.GeoJSON),
   { ssr: false }
 );
+const Polyline = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Polyline),
+  { ssr: false }
+);
+
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
+}
+
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+}
 
 interface BookingRouteMapProps {
   readonly carLocation: { lat: number; lng: number };
@@ -79,15 +98,18 @@ export default function BookingRouteMap({
   const centerLat = (carLocation.lat + spotLocation.lat) / 2;
   const centerLng = (carLocation.lng + spotLocation.lng) / 2;
 
+  // Calculate fallback metrics
+  const straightDistance = getDistanceFromLatLonInKm(carLocation.lat, carLocation.lng, spotLocation.lat, spotLocation.lng);
+
   // Calculate distance in km
   const distance = routeData
     ? (routeData.distance / 1000).toFixed(2)
-    : '—';
+    : straightDistance.toFixed(2);
 
-  // Calculate duration in minutes
+  // Calculate duration in minutes (fallback assumes 30km/h city speed)
   const duration = routeData
     ? Math.ceil(routeData.duration / 60)
-    : '—';
+    : Math.ceil((straightDistance / 30) * 60) || 1;
 
   return (
     <div className="space-y-4">
@@ -130,13 +152,24 @@ export default function BookingRouteMap({
           )}
 
           {/* Route Line */}
-          {routeData?.geometry && (
+          {routeData?.geometry ? (
             <GeoJSON
+              key={JSON.stringify(routeData.geometry)}
               data={routeData.geometry}
               style={{
                 color: '#3b82f6',
                 weight: 5,
                 opacity: 0.9,
+              }}
+            />
+          ) : (
+            <Polyline
+              positions={[[carLocation.lat, carLocation.lng], [spotLocation.lat, spotLocation.lng]]}
+              pathOptions={{
+                color: '#3b82f6',
+                weight: 5,
+                dashArray: '10, 10',
+                opacity: 0.8
               }}
             />
           )}

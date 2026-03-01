@@ -19,10 +19,7 @@ export async function getRoute(
   try {
     const url = `https://router.project-osrm.org/route/v1/${mode}/${driverLng},${driverLat};${spotLng},${spotLat}?geometries=geojson&overview=full`;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    const response = await fetch(url);
     
     const data = await response.json();
 
@@ -38,8 +35,12 @@ export async function getRoute(
       distance: route.distance, // meters
       duration: route.duration, // seconds
     };
-  } catch (error) {
-    console.error('Error fetching route:', error);
+  } catch (error: any) {
+    if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+      console.warn('Route fetch timed out after 6 seconds.');
+    } else {
+      console.error('Error fetching route:', error);
+    }
     return null;
   }
 }
